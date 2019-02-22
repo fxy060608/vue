@@ -5,6 +5,20 @@ import { cached, camelize, extend, isDef, isUndef, hyphenate } from 'shared/util
 
 const cssVarRE = /^--/
 const importantRE = /\s*!important$/
+
+// upx,rpx 正则匹配
+const unitRE = /([+-]?\d+(\.\d+)?)[r|u]px/g
+
+const transformUnit = (val) => {
+  if (typeof val === 'string') {
+    return val.replace(unitRE, (a, b) => {
+      /* eslint-disable no-undef */
+      return uni.upx2px(b) + 'px'
+    })
+  }
+  return val
+}
+
 const setProp = (el, name, val) => {
   /* istanbul ignore if */
   if (cssVarRE.test(name)) {
@@ -18,10 +32,10 @@ const setProp = (el, name, val) => {
       // {display: ["-webkit-box", "-ms-flexbox", "flex"]}
       // Set them one by one, and the browser will only set those it can recognize
       for (let i = 0, len = val.length; i < len; i++) {
-        el.style[normalizedName] = val[i]
+        el.style[normalizedName] = transformUnit(val[i])
       }
     } else {
-      el.style[normalizedName] = val
+      el.style[normalizedName] = transformUnit(val)
     }
   }
 }
