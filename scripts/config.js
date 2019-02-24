@@ -210,7 +210,14 @@ const builds = {
     dest: resolve('packages/weex-template-compiler/build.js'),
     format: 'cjs',
     external: Object.keys(require('../packages/weex-template-compiler/package.json').dependencies)
-  }
+  },
+  // Runtime only ES modules build (for bundlers)
+  'mp-runtime-esm': {
+    entry: resolve('mp/entry-runtime.js'),
+    dest: resolve('dist/mp.runtime.esm.js'),
+    format: 'es',
+    banner
+  },
 }
 
 function genConfig (name) {
