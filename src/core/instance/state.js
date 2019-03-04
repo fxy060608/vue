@@ -63,7 +63,7 @@ export function initState (vm: Component) {
 
 function initProps (vm: Component, propsOptions: Object) {
   const propsData = vm.$options.propsData || {}
-  const props = vm._props = {}
+  const props = vm.$options.$component.properties
   // cache prop keys so that future props updates can iterate using Array
   // instead of dynamic object key enumeration.
   const keys = vm.$options._propKeys = []
@@ -102,9 +102,22 @@ function initProps (vm: Component, propsOptions: Object) {
     // static props are already proxied on the component's prototype
     // during Vue.extend(). We only need to proxy props defined at
     // instantiation here.
-    if (!(key in vm)) {
-      proxy(vm, `_props`, key)
-    }
+    // if (!(key in vm)) {
+      const sharedPropertyDefinition = {
+        enumerable: true,
+        configurable: true,
+        get: noop,
+        set: noop
+      }
+      sharedPropertyDefinition.get = function proxyGetter () {
+        return this.$options.$component.properties[key]
+      }
+      sharedPropertyDefinition.set = function proxySetter (val) {
+        this.$options.$component.properties[key] = val
+      }
+      Object.defineProperty(vm, key, sharedPropertyDefinition)
+      // proxy(vm, `_props`, key)
+    // }
   }
   toggleObserving(true)
 }

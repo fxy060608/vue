@@ -9,21 +9,21 @@ import {
   noop
 } from 'core/util/index'
 
-function createEmptyRender(){
-    
+function createEmptyRender() {
+
 }
 
-export function mountComponent (
+export function mountComponent(
   vm: Component,
   el: ?Element,
   hydrating?: boolean
 ): Component {
-  if(!vm.mpType){//main.js 中的 new Vue
+  if (!vm.mpType) {//main.js 中的 new Vue
     return vm
-  }  
-  if(vm.mpType === 'app'){
-    vm.$options.render = createEmptyRender  
-  }  
+  }
+  if (vm.mpType === 'app') {
+    vm.$options.render = createEmptyRender
+  }
   if (!vm.$options.render) {
     vm.$options.render = createEmptyRender
     if (process.env.NODE_ENV !== 'production') {
@@ -54,7 +54,7 @@ export function mountComponent (
   // since the watcher's initial patch may call $forceUpdate (e.g. inside child
   // component's mounted hook), which relies on vm._watcher being already defined
   new Watcher(vm, updateComponent, noop, {
-    before () {
+    before() {
       if (vm._isMounted && !vm._isDestroyed) {
         callHook(vm, 'beforeUpdate')
       }
