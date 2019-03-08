@@ -3,7 +3,7 @@
  */
 const ARRAYTYPE = '[object Array]'
 const OBJECTTYPE = '[object Object]'
-const FUNCTIONTYPE = '[object Function]'
+// const FUNCTIONTYPE = '[object Function]'
 
 export default function diff(current, pre) {
     const result = {}
@@ -94,9 +94,9 @@ function _diff(current, pre, path, result) {
 }
 
 function setResult(result, k, v) {
-    if (type(v) != FUNCTIONTYPE) {
+    // if (type(v) != FUNCTIONTYPE) {
         result[k] = v
-    }
+    // }
 }
 
 function type(obj) {

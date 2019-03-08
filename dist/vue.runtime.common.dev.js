@@ -4602,7 +4602,12 @@ function initState (vm) {
 
 function initProps (vm, propsOptions) {
   var propsData = vm.$options.propsData || {};
-  var props = vm._props = {};
+  
+  var props;
+  {
+    props = vm._props = {};
+  }
+  
   // cache prop keys so that future props updates can iterate using Array
   // instead of dynamic object key enumeration.
   var keys = vm.$options._propKeys = [];
@@ -4639,8 +4644,10 @@ function initProps (vm, propsOptions) {
     // static props are already proxied on the component's prototype
     // during Vue.extend(). We only need to proxy props defined at
     // instantiation here.
-    if (!(key in vm)) {
-      proxy(vm, "_props", key);
+    {
+      if (!(key in vm)) {
+        proxy(vm, "_props", key);
+      }
     }
   };
 
@@ -7085,6 +7092,20 @@ function getStyle (vnode, checkChild) {
 
 var cssVarRE = /^--/;
 var importantRE = /\s*!important$/;
+
+// upx,rpx 正则匹配
+var unitRE = /([+-]?\d+(\.\d+)?)[r|u]px/g;
+
+var transformUnit = function (val) {
+  if (typeof val === 'string') {
+    return val.replace(unitRE, function (a, b) {
+      /* eslint-disable no-undef */
+      return uni.upx2px(b) + 'px'
+    })
+  }
+  return val
+};
+
 var setProp = function (el, name, val) {
   /* istanbul ignore if */
   if (cssVarRE.test(name)) {
@@ -7098,10 +7119,10 @@ var setProp = function (el, name, val) {
       // {display: ["-webkit-box", "-ms-flexbox", "flex"]}
       // Set them one by one, and the browser will only set those it can recognize
       for (var i = 0, len = val.length; i < len; i++) {
-        el.style[normalizedName] = val[i];
+        el.style[normalizedName] = transformUnit(val[i]);
       }
     } else {
-      el.style[normalizedName] = val;
+      el.style[normalizedName] = transformUnit(val);
     }
   }
 };

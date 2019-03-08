@@ -2,6 +2,7 @@
 
 import {
     extend,
+    camelize,
     hyphenate,
     isPlainObject
 } from 'shared/util'
@@ -25,16 +26,27 @@ import {
 } from 'web/util/style'
 
 
-export function internalMixin(Vue: Class<Component> ) {
+const MP_METHODS = ['createSelectorQuery', 'createIntersectionObserver']
+
+export function internalMixin(Vue: Class<Component>) {
 
     const oldEmit = Vue.prototype.$emit
 
     Vue.prototype.$emit = function(event: string): Component {
         if (this.$mp && event) {
-            this.$mp[this.mpType]['triggerEvent'](event, toArray(arguments, 1))
+            //百度需要将 click-left 转换为 clickLeft
+            this.$mp[this.mpType]['triggerEvent'](camelize(event), toArray(arguments, 1))
         }
         return oldEmit.apply(this, arguments)
     }
+
+    MP_METHODS.forEach(method => {
+        Vue.prototype[method] = function() {
+            if (this.$mp) {
+                return this.$mp[this.mpType][method]()
+            }
+        }
+    })
 
     Vue.prototype.__call_hook = function(hook, args) {
         const vm = this
@@ -53,6 +65,10 @@ export function internalMixin(Vue: Class<Component> ) {
         }
         popTarget()
         return ret
+    }
+
+    Vue.prototype.__set_model = function(prop, value) {
+        this[prop] = value
     }
 
     Vue.prototype.__get_orig = function(item) {

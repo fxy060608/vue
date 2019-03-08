@@ -18,7 +18,6 @@ import {
     lifecycleMixin
 } from './lifecycle'
 
-
 // install platform patch function
 Vue.prototype.__patch__ = patch
 

@@ -63,7 +63,14 @@ export function initState (vm: Component) {
 
 function initProps (vm: Component, propsOptions: Object) {
   const propsData = vm.$options.propsData || {}
-  const props = vm.$options.$component.properties
+  
+  let props
+  if(__MP__){
+    props = vm._props = vm.$options.$component.properties
+  } else {
+    props = vm._props = {}
+  }
+  
   // cache prop keys so that future props updates can iterate using Array
   // instead of dynamic object key enumeration.
   const keys = vm.$options._propKeys = []
@@ -85,7 +92,7 @@ function initProps (vm: Component, propsOptions: Object) {
           vm
         )
       }
-      defineReactive(props, key, value, () => {
+      defineReactive(props, process.env.VUE_APP_PLATFORM === 'mp-baidu' ? ('__' + key) : key, value, () => {
         if (!isRoot && !isUpdatingChildComponent) {
           warn(
             `Avoid mutating a prop directly since the value will be ` +
@@ -97,12 +104,13 @@ function initProps (vm: Component, propsOptions: Object) {
         }
       })
     } else {
-      defineReactive(props, key, value)
+      //TODO props 理论上不应该在子组件中做修改，如果修改 props 的嵌套属性，不会触发 mp 的 setData，导致页面不生效，
+      defineReactive(props, process.env.VUE_APP_PLATFORM === 'mp-baidu' ? ('__' + key) : key, value)
     }
     // static props are already proxied on the component's prototype
     // during Vue.extend(). We only need to proxy props defined at
     // instantiation here.
-    // if (!(key in vm)) {
+    if(__MP__){
       const sharedPropertyDefinition = {
         enumerable: true,
         configurable: true,
@@ -113,11 +121,25 @@ function initProps (vm: Component, propsOptions: Object) {
         return this.$options.$component.properties[key]
       }
       sharedPropertyDefinition.set = function proxySetter (val) {
-        this.$options.$component.properties[key] = val
+        this.$options.$component.setData({
+          [key]:val
+        })
+        if(process.env.NODE_ENV !== 'production'){
+          warn(
+            `Avoid mutating a prop directly since the value will be ` +
+            `overwritten whenever the parent component re-renders. ` +
+            `Instead, use a data or computed property based on the prop's ` +
+            `value. Prop being mutated: "${key}"`,
+            vm
+          )
+        }
       }
       Object.defineProperty(vm, key, sharedPropertyDefinition)
-      // proxy(vm, `_props`, key)
-    // }
+    } else {
+      if (!(key in vm)) {
+        proxy(vm, `_props`, key)
+      }
+    }
   }
   toggleObserving(true)
 }

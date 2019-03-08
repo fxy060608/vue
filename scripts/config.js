@@ -213,6 +213,7 @@ const builds = {
   },
   // Runtime only ES modules build (for bundlers)
   'mp-runtime-esm': {
+    mp: true,
     entry: resolve('mp/entry-runtime.js'),
     dest: resolve('dist/mp.runtime.esm.js'),
     format: 'es',
@@ -246,7 +247,8 @@ function genConfig (name) {
   const vars = {
     __WEEX__: !!opts.weex,
     __WEEX_VERSION__: weexVersion,
-    __VERSION__: version
+    __VERSION__: version,
+    __MP__: !!opts.mp
   }
   // feature flags
   Object.keys(featureFlags).forEach(key => {
