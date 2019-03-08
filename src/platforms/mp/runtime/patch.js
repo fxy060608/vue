@@ -11,7 +11,7 @@ function getVmData(vm) {
         Object.keys(vm._data || {}),
         Object.keys(vm._computedWatchers || {}))
 
-    const ret = dataKeys.reduce(function (ret, key) {
+    const ret = dataKeys.reduce(function(ret, key) {
         ret[key] = vm[key]
         return ret
     }, {})
@@ -21,7 +21,7 @@ function getVmData(vm) {
     return ret
 }
 
-export const patch: Function = function (oldVnode, vnode) {
+export const patch: Function = function(oldVnode, vnode) {
     if (vnode === null) {
         return console.log(this.$mp[this.mpType].is + ' destroy')
     }
@@ -34,7 +34,8 @@ export const patch: Function = function (oldVnode, vnode) {
             mpData[key] = mpInstance.data[key]
         })
         const diffData = diff(data, mpData)
-        console.log('[' + mpInstance.is + ']['+this._uid+']差量数据', JSON.stringify(diffData))
+        console.log('[' + mpInstance.is + '][' + this._uid + ']差量数据', JSON.stringify(diffData))
+        //TODO 目前若 computed 引用了 props，则会引发再次 render watch 来同步 computed 属性
         //disable dep collection
         pushTarget()
         mpInstance.setData(diffData)

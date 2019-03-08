@@ -23,6 +23,7 @@ const LIFECYCLE_HOOKS = [
     'onNavigationBarSearchInputConfirmed',
     'onNavigationBarSearchInputClicked',
     //Component
+    'onReady',// 兼容旧版本，应该移除该事件
     'onPageShow',
     'onPageHide',
     'onPageResize'
