@@ -26,9 +26,9 @@ import {
 } from 'web/util/style'
 
 
-const MP_METHODS = ['createSelectorQuery', 'createIntersectionObserver']
+const MP_METHODS = ['createSelectorQuery', 'createIntersectionObserver', 'selectAllComponents', 'selectComponent']
 
-export function internalMixin(Vue: Class<Component>) {
+export function internalMixin(Vue: Class<Component> ) {
 
     const oldEmit = Vue.prototype.$emit
 
@@ -41,9 +41,9 @@ export function internalMixin(Vue: Class<Component>) {
     }
 
     MP_METHODS.forEach(method => {
-        Vue.prototype[method] = function() {
+        Vue.prototype[method] = function(args) {
             if (this.$mp) {
-                return this.$mp[this.mpType][method]()
+                return this.$mp[this.mpType][method](args)
             }
         }
     })

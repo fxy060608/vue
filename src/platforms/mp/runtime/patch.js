@@ -41,10 +41,11 @@ export const patch: Function = function(oldVnode, vnode) {
             mpData[key] = mpInstance.data[key]
         })
         const diffData = diff(data, mpData)
-        console.log('[' + (mpInstance.is || mpInstance.route) + '][' + this._uid + ']差量数据', JSON.stringify(diffData))
+        console.log('[' + (mpInstance.is || mpInstance.route) + '][' + this._uid + ']差量数据['+(+new Date)+']', JSON.stringify(diffData))
         //disable dep collection
         pushTarget()
         //TODO 目前若 computed 引用了 props，则会引发再次 render watch 来同步 computed 属性
+        //百度内部 setData 使用了 nextTick，会导致数据 render watcher 触发多次，且数据不统一
         mpInstance.setData(diffData)
     }
 }
