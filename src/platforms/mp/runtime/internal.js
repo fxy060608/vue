@@ -13,6 +13,11 @@ import {
 } from 'core/observer/dep'
 
 import {
+    initProvide,
+    initInjections
+} from 'core/instance/inject'
+
+import {
     toArray,
     invokeWithErrorHandling
 } from 'core/util/index'
@@ -47,6 +52,10 @@ export function internalMixin(Vue: Class<Component> ) {
             }
         }
     })
+
+    Vue.prototype.__init_provide = initProvide
+
+    Vue.prototype.__init_injections = initInjections
 
     Vue.prototype.__call_hook = function(hook, args) {
         const vm = this
