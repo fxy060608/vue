@@ -44,7 +44,6 @@ export function mountComponent(
       }
     }
   }
-  callHook(vm, 'beforeMount')
 
   const updateComponent = () => {
     vm._update(vm._render(), hydrating)

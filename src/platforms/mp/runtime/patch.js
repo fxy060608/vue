@@ -36,7 +36,9 @@ export const patch: Function = function(oldVnode, vnode) {
                     ']差量更新',
                     JSON.stringify(diffData))
             }
-            mpInstance.setData(diffData)
+            mpInstance.setData(diffData,function(){
+                //TODO
+            })
         }
     }
 }
