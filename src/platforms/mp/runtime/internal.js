@@ -34,7 +34,7 @@ import {
 const MP_METHODS = ['createSelectorQuery', 'createIntersectionObserver', 'selectAllComponents', 'selectComponent']
 
 export function internalMixin(Vue: Class<Component> ) {
-
+    
     const oldEmit = Vue.prototype.$emit
 
     Vue.prototype.$emit = function(event: string): Component {
