@@ -2,6 +2,7 @@
 
 import {
     extend,
+    cached,
     camelize,
     hyphenate,
     isPlainObject
@@ -33,14 +34,28 @@ import {
 
 const MP_METHODS = ['createSelectorQuery', 'createIntersectionObserver', 'selectAllComponents', 'selectComponent']
 
-export function internalMixin(Vue: Class<Component> ) {
-    
+const customizeRE = /:/g
+
+const customize = cached((str) => {
+    return camelize(str.replace(customizeRE, '-'))
+})
+
+function getTarget(obj, path) {
+    const parts = path.split('.')
+    if (parts.length === 1) {
+        return obj[parts[0]]
+    }
+    return getTarget(obj[parts[0]], parts.slice(1).join('.'))
+}
+
+export function internalMixin(Vue: Class<Component>) {
+
     const oldEmit = Vue.prototype.$emit
 
     Vue.prototype.$emit = function(event: string): Component {
         if (this.$mp && event) {
             //百度需要将 click-left 转换为 clickLeft
-            this.$mp[this.mpType]['triggerEvent'](camelize(event), toArray(arguments, 1))
+            this.$mp[this.mpType]['triggerEvent'](customize(event), toArray(arguments, 1))
         }
         return oldEmit.apply(this, arguments)
     }
@@ -76,8 +91,22 @@ export function internalMixin(Vue: Class<Component> ) {
         return ret
     }
 
-    Vue.prototype.__set_model = function(prop, value) {
-        this[prop] = value
+    Vue.prototype.__set_model = function(target, value) {
+        if (target.indexOf('.') === -1) {
+            this[target] = value
+        } else {
+            const paths = target.split('.')
+            const key = paths.pop()
+            this.$set(getTarget(this, paths.join('.')), key, value)
+        }
+    }
+
+    Vue.prototype.__set_sync = function(target, key, value) {
+        if (!target) {
+            this[key] = value
+        } else {
+            this.$set(getTarget(this, target), key, value)
+        }
     }
 
     Vue.prototype.__get_orig = function(item) {
