@@ -54,7 +54,7 @@ export function internalMixin(Vue: Class<Component>) {
 
     Vue.prototype.$emit = function(event: string): Component {
         if (this.$mp && event) {
-            //百度需要将 click-left 转换为 clickLeft
+            //click-left,click:left => clickLeft
             this.$mp[this.mpType]['triggerEvent'](customize(event), toArray(arguments, 1))
         }
         return oldEmit.apply(this, arguments)
@@ -91,7 +91,15 @@ export function internalMixin(Vue: Class<Component>) {
         return ret
     }
 
-    Vue.prototype.__set_model = function(target, value) {
+    Vue.prototype.__set_model = function(target, value, modifiers) {
+        if (Array.isArray(modifiers)) {
+            if (modifiers.includes('trim')) {
+                value = value.trim()
+            }
+            if (modifiers.includes('number')) {
+                value = this._n(value)
+            }
+        }
         if (target.indexOf('.') === -1) {
             this[target] = value
         } else {
