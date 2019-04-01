@@ -60,13 +60,6 @@ export function internalMixin(Vue: Class<Component>) {
         return oldEmit.apply(this, arguments)
     }
 
-    Vue.prototype.$getAppWebview = function() {
-        if (this.$mp) {
-            /* eslint-disable  no-undef */
-            return plus.webview.getWebviewById(this.$mp[this.mpType]['__wxWebviewId__'] + '')
-        }
-    }
-
     MP_METHODS.forEach(method => {
         Vue.prototype[method] = function(args) {
             if (this.$mp) {
