@@ -91,7 +91,7 @@ export function internalMixin(Vue: Class<Component>) {
         return ret
     }
 
-    Vue.prototype.__set_model = function(target, value, modifiers) {
+    Vue.prototype.__set_model = function(target, key, value, modifiers) {
         if (Array.isArray(modifiers)) {
             if (modifiers.includes('trim')) {
                 value = value.trim()
@@ -100,21 +100,11 @@ export function internalMixin(Vue: Class<Component>) {
                 value = this._n(value)
             }
         }
-        if (target.indexOf('.') === -1) {
-            this[target] = value
-        } else {
-            const paths = target.split('.')
-            const key = paths.pop()
-            this.$set(getTarget(this, paths.join('.')), key, value)
-        }
+        target[key] = value
     }
 
     Vue.prototype.__set_sync = function(target, key, value) {
-        if (!target) {
-            this[key] = value
-        } else {
-            this.$set(getTarget(this, target), key, value)
-        }
+        target[key] = value
     }
 
     Vue.prototype.__get_orig = function(item) {
@@ -122,6 +112,10 @@ export function internalMixin(Vue: Class<Component>) {
             return item['$orig'] || item
         }
         return item
+    }
+
+    Vue.prototype.__get_value = function(dataPath, target) {
+        return getTarget(target || this, dataPath)
     }
 
 
