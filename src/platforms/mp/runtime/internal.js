@@ -2,8 +2,6 @@
 
 import {
     extend,
-    cached,
-    camelize,
     hyphenate,
     isPlainObject
 } from 'shared/util'
@@ -31,14 +29,7 @@ import {
     normalizeStyleBinding
 } from 'web/util/style'
 
-
 const MP_METHODS = ['createSelectorQuery', 'createIntersectionObserver', 'selectAllComponents', 'selectComponent']
-
-const customizeRE = /:/g
-
-const customize = cached((str) => {
-    return camelize(str.replace(customizeRE, '-'))
-})
 
 function getTarget(obj, path) {
     const parts = path.split('.')
@@ -55,7 +46,7 @@ export function internalMixin(Vue: Class<Component>) {
     Vue.prototype.$emit = function(event: string): Component {
         if (this.$mp && event) {
             //click-left,click:left => clickLeft
-            this.$mp[this.mpType]['triggerEvent'](customize(event), toArray(arguments, 1))
+            this.$mp[this.mpType]['triggerEvent'](event, toArray(arguments, 1))
         }
         return oldEmit.apply(this, arguments)
     }

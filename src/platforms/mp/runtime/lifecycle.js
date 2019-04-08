@@ -44,8 +44,8 @@ export function lifecycleMixin(Vue: Class<Component>) {
                 }
             })
         }
-        
-        return oldExtend.call(this,extendOptions)
+
+        return oldExtend.call(this, extendOptions)
     }
 
     const strategies = Vue.config.optionMergeStrategies
@@ -53,4 +53,6 @@ export function lifecycleMixin(Vue: Class<Component>) {
     LIFECYCLE_HOOKS.forEach(hook => {
         strategies[hook] = mergeHook
     })
+
+    Vue.prototype.__lifecycle_hooks__ = LIFECYCLE_HOOKS
 }
