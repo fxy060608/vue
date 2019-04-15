@@ -33,10 +33,14 @@ const MP_METHODS = ['createSelectorQuery', 'createIntersectionObserver', 'select
 
 function getTarget(obj, path) {
     const parts = path.split('.')
-    if (parts.length === 1) {
-        return obj[parts[0]]
+    let key = parts[0]
+    if (key.indexOf('__$n') === 0) { //number index
+        key = parseInt(key.replace('__$n', ''))
     }
-    return getTarget(obj[parts[0]], parts.slice(1).join('.'))
+    if (parts.length === 1) {
+        return obj[key]
+    }
+    return getTarget(obj[key], parts.slice(1).join('.'))
 }
 
 export function internalMixin(Vue: Class<Component>) {
@@ -45,8 +49,9 @@ export function internalMixin(Vue: Class<Component>) {
 
     Vue.prototype.$emit = function(event: string): Component {
         if (this.$mp && event) {
-            //click-left,click:left => clickLeft
-            this.$mp[this.mpType]['triggerEvent'](event, toArray(arguments, 1))
+            this.$mp[this.mpType]['triggerEvent'](event, {
+                __args__: toArray(arguments, 1)
+            })
         }
         return oldEmit.apply(this, arguments)
     }
