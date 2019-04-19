@@ -38,7 +38,7 @@ export function lifecycleMixin(Vue: Class<Component>) {
         const methods = extendOptions.methods
         if (methods) {
             Object.keys(methods).forEach(methodName => {
-                if (LIFECYCLE_HOOKS.includes(methodName)) {
+                if (LIFECYCLE_HOOKS.indexOf(methodName)!==-1) {
                     extendOptions[methodName] = methods[methodName]
                     delete methods[methodName]
                 }

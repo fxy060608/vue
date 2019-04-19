@@ -89,10 +89,10 @@ export function internalMixin(Vue: Class<Component>) {
 
     Vue.prototype.__set_model = function(target, key, value, modifiers) {
         if (Array.isArray(modifiers)) {
-            if (modifiers.includes('trim')) {
+            if (modifiers.indexOf('trim')!==-1) {
                 value = value.trim()
             }
-            if (modifiers.includes('number')) {
+            if (modifiers.indexOf('number')!==-1) {
                 value = this._n(value)
             }
         }
