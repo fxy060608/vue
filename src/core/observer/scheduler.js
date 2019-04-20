@@ -14,7 +14,7 @@ import {
 
 export const MAX_UPDATE_COUNT = 100
 
-const queue: Array<Watcher> = []
+export const queue: Array<Watcher> = []
 const activatedChildren: Array<Component> = []
 let has: { [key: number]: ?true } = {}
 let circular: { [key: number]: number } = {}

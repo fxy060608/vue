@@ -29,6 +29,10 @@ import {
     normalizeStyleBinding
 } from 'web/util/style'
 
+import {
+    nextTick
+} from './next-tick'
+
 const MP_METHODS = ['createSelectorQuery', 'createIntersectionObserver', 'selectAllComponents', 'selectComponent']
 
 function getTarget(obj, path) {
@@ -54,6 +58,10 @@ export function internalMixin(Vue: Class<Component>) {
             })
         }
         return oldEmit.apply(this, arguments)
+    }
+    
+    Vue.prototype.$nextTick = function (fn: Function) {
+      return nextTick(this, fn)
     }
 
     MP_METHODS.forEach(method => {
@@ -89,10 +97,10 @@ export function internalMixin(Vue: Class<Component>) {
 
     Vue.prototype.__set_model = function(target, key, value, modifiers) {
         if (Array.isArray(modifiers)) {
-            if (modifiers.indexOf('trim')!==-1) {
+            if (modifiers.indexOf('trim') !== -1) {
                 value = value.trim()
             }
-            if (modifiers.indexOf('number')!==-1) {
+            if (modifiers.indexOf('number') !== -1) {
                 value = this._n(value)
             }
         }

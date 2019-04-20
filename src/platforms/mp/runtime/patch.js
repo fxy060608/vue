@@ -1,6 +1,10 @@
 /* @flow */
 import diff from './diff'
 
+import {
+    flushCallbacks
+} from './next-tick'
+
 function cloneWithData(vm) {
     // 确保当前 vm 所有数据被同步
     const dataKeys = [].concat(
@@ -36,9 +40,13 @@ export const patch: Function = function(oldVnode, vnode) {
                     ']差量更新',
                     JSON.stringify(diffData))
             }
-            mpInstance.setData(diffData,function(){
-                //TODO
+            this.__next_tick_pending = true
+            mpInstance.setData(diffData, () => {
+                this.__next_tick_pending = false
+                flushCallbacks(this)
             })
+        } else {
+            flushCallbacks(this)
         }
     }
 }
