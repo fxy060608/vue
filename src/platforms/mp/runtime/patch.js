@@ -32,7 +32,7 @@ export const patch: Function = function(oldVnode, vnode) {
         return
     }
     if (this.mpType === 'page' || this.mpType === 'component') {
-        const mpInstance = this.$mp[this.mpType]
+        const mpInstance = this.$scope
         const data = cloneWithData(this)
         data.__webviewId__ = mpInstance.data.__webviewId__
         const mpData = Object.create(null)

@@ -52,8 +52,8 @@ export function internalMixin(Vue: Class<Component>) {
     const oldEmit = Vue.prototype.$emit
 
     Vue.prototype.$emit = function(event: string): Component {
-        if (this.$mp && event) {
-            this.$mp[this.mpType]['triggerEvent'](event, {
+        if (this.$scope && event) {
+            this.$scope['triggerEvent'](event, {
                 __args__: toArray(arguments, 1)
             })
         }
@@ -66,8 +66,8 @@ export function internalMixin(Vue: Class<Component>) {
 
     MP_METHODS.forEach(method => {
         Vue.prototype[method] = function(args) {
-            if (this.$mp) {
-                return this.$mp[this.mpType][method](args)
+            if (this.$scope) {
+                return this.$scope[method](args)
             }
         }
     })

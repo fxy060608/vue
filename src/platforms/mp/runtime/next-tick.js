@@ -12,7 +12,7 @@ import {
 export function flushCallbacks(vm) {
     if (vm.__next_tick_callbacks && vm.__next_tick_callbacks.length) {
         if (process.env.VUE_APP_DEBUG) {
-            const mpInstance = vm.$mp[vm.mpType]
+            const mpInstance = vm.$scope
             console.log('[' + (+new Date) + '][' + (mpInstance.is || mpInstance.route) + '][' + vm._uid +
                 ']:flushCallbacks[' + vm.__next_tick_callbacks.length + ']')
         }
@@ -33,14 +33,14 @@ export function nextTick(vm, cb) {
     //2.nextTick 之前存在 render watcher
     if (!vm.__next_tick_pending && !hasRenderWatcher(vm)) {
         if(process.env.VUE_APP_DEBUG){
-            const mpInstance = vm.$mp[vm.mpType]
+            const mpInstance = vm.$scope
             console.log('[' + (+new Date) + '][' + (mpInstance.is || mpInstance.route) + '][' + vm._uid +
                 ']:nextVueTick')
         }
         return nextVueTick(cb, vm)
     }else{
         if(process.env.VUE_APP_DEBUG){
-            const mpInstance = vm.$mp[vm.mpType]
+            const mpInstance = vm.$scope
             console.log('[' + (+new Date) + '][' + (mpInstance.is || mpInstance.route) + '][' + vm._uid +
                 ']:nextMPTick')
         }

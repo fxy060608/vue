@@ -35,8 +35,8 @@ if (process.env.NODE_ENV !== 'production') {
 
   formatComponentName = (vm, includeFile) => {
     if(__MP__){
-      if(vm.$mp && vm.$mp[vm.mpType]){
-        return vm.$mp[vm.mpType].is
+      if(vm.$scope && vm.$scope.is){
+        return vm.$scope.is
       }
     }
     if (vm.$root === vm) {
