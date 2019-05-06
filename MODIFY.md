@@ -9,18 +9,8 @@ src/core/instance/init.js(initInjections(vm), initProvide(vm),callHook(vm, 'crea
 src/core/observer/scheduler.js(export const queue)
 src/platforms/web/runtime/modules/style.js transformUnit
 
-
-mpAttached
-    1.new Vue()
-    2.Init(Events & Lifecycle)
-        vueBeforeCreate
-    3.Init(reactivity)
-mpReady
-    1.parent
-    2.Init(injections)
-        vueCreated
-        vueBeforeMount
-        vueMounted
+//weex
+src/platforms/weex/runtime/modules/attrs
     
     
     
