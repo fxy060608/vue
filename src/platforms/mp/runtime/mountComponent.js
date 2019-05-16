@@ -44,6 +44,8 @@ export function mountComponent(
       }
     }
   }
+  
+  vm.mpHost !== 'mp-toutiao' && callHook(vm, 'beforeMount')
 
   const updateComponent = () => {
     vm._update(vm._render(), hydrating)

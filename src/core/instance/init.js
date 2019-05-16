@@ -53,14 +53,10 @@ export function initMixin (Vue: Class<Component>) {
     initEvents(vm)
     initRender(vm)
     callHook(vm, 'beforeCreate')
-    if(!__MP__){
-      initInjections(vm) // resolve injections before data/props  
-    }
+    vm.mpHost !== 'mp-toutiao' && initInjections(vm) // resolve injections before data/props  
     initState(vm)
-    if(!__MP__){
-      initProvide(vm) // resolve provide after data/props
-      callHook(vm, 'created')      
-    }
+    vm.mpHost !== 'mp-toutiao' && initProvide(vm) // resolve provide after data/props
+    vm.mpHost !== 'mp-toutiao' && callHook(vm, 'created')      
 
     /* istanbul ignore if */
     if (process.env.NODE_ENV !== 'production' && config.performance && mark) {
