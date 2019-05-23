@@ -104,10 +104,16 @@ export function internalMixin(Vue: Class<Component>) {
                 value = this._n(value)
             }
         }
+        if(!target){
+            target = this
+        }
         target[key] = value
     }
 
     Vue.prototype.__set_sync = function(target, key, value) {
+        if(!target){
+            target = this
+        }
         target[key] = value
     }
 
