@@ -50,11 +50,11 @@ export function removeChild (node: WeexElement, child: WeexElement) {
 
 export function appendChild (node: WeexElement, child: WeexElement) {
   if (child.nodeType === 3) {
-    if (node.type === 'text') {
+    if (node.type === 'u-text') {
       node.setAttr('value', child.text)
       child.parentNode = node
     } else {
-      const text = createElement('text')
+      const text = createElement('u-text')
       text.setAttr('value', child.text)
       node.appendChild(text)
     }
