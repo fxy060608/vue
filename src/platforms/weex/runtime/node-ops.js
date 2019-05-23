@@ -27,11 +27,11 @@ export function insertBefore (
   before: WeexElement
 ) {
   if (target.nodeType === 3) {
-    if (node.type === 'text') {
+    if (node.type === 'u-text') {
       node.setAttr('value', target.text)
       target.parentNode = node
     } else {
-      const text = createElement('text')
+      const text = createElement('u-text')
       text.setAttr('value', target.text)
       node.insertBefore(text, before)
     }
