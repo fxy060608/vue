@@ -54,7 +54,7 @@ function normalizeAttr(key, val, el, ctx) {
 function normalizeAttrs(attrs, el, ctx) {
     const opts = TAGS[el.type]
     if (!opts) {
-        return
+        return attrs
     }
     const stylesheet = ctx.$options.style || {}
     Object.keys(attrs).forEach(key => {
