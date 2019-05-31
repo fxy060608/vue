@@ -13,6 +13,7 @@ src/platforms/web/runtime/modules/style.js transformUnit
 src/platforms/weex/runtime/node-ops u-text
 src/platforms/weex/runtime/modules/attrs
 src/platforms/weex/compiler/modules/recycle-list/text
+src/platforms/weex/util/element isReservedTag (switch)
     
     
     
