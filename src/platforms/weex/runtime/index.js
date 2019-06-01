@@ -39,6 +39,8 @@ Vue.prototype.$mount = function (
   )
 }
 // add callHook
-Vue.prototype.__call_hook = callHook
+Vue.prototype.__call_hook = function __call_hook(hook){
+  return callHook(this,hook)
+}
 
 export default Vue
