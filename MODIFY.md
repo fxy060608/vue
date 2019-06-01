@@ -10,6 +10,7 @@ src/core/observer/scheduler.js(export const queue)
 src/platforms/web/runtime/modules/style.js transformUnit
 
 //weex
+src/platforms/weex/runtime/index callHook
 src/platforms/weex/runtime/node-ops u-text
 src/platforms/weex/runtime/modules/attrs
 src/platforms/weex/compiler/modules/recycle-list/text

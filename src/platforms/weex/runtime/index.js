@@ -2,7 +2,7 @@
 
 import Vue from 'core/index'
 import { patch } from 'weex/runtime/patch'
-import { mountComponent } from 'core/instance/lifecycle'
+import { callHook, mountComponent } from 'core/instance/lifecycle'
 import platformDirectives from 'weex/runtime/directives/index'
 import platformComponents from 'weex/runtime/components/index'
 
@@ -38,5 +38,7 @@ Vue.prototype.$mount = function (
     hydrating
   )
 }
+// add callHook
+Vue.prototype.__call_hook = callHook
 
 export default Vue
