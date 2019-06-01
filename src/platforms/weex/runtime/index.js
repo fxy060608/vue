@@ -2,7 +2,7 @@
 
 import Vue from 'core/index'
 import { patch } from 'weex/runtime/patch'
-import { callHook, mountComponent } from 'core/instance/lifecycle'
+import { mountComponent } from 'core/instance/lifecycle'
 import platformDirectives from 'weex/runtime/directives/index'
 import platformComponents from 'weex/runtime/components/index'
 
@@ -13,6 +13,8 @@ import {
   isRuntimeComponent,
   isUnknownElement
 } from 'weex/util/element'
+
+import callHook from './call-hook'
 
 // install platform specific utils
 Vue.config.mustUseProp = mustUseProp
@@ -39,8 +41,6 @@ Vue.prototype.$mount = function (
   )
 }
 // add callHook
-Vue.prototype.__call_hook = function __call_hook(hook){
-  return callHook(this,hook)
-}
+Vue.prototype.__call_hook = callHook
 
 export default Vue
