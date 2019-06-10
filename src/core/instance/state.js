@@ -92,8 +92,15 @@ function initProps (vm: Component, propsOptions: Object) {
                 return
             }
             //fixed by xxxxxx __next_tick_pending,uni://form-field 时不告警
-            if(vm._getFormData || (vm.$parent && vm.$parent.__next_tick_pending)){
+            if(vm._getFormData){
               return
+            }
+            let $parent = vm.$parent
+            while($parent){
+              if($parent.__next_tick_pending){
+                return  
+              }
+              $parent = $parent.$parent
             }
           }
           warn(
