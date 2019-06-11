@@ -18,6 +18,7 @@ import {
 
 import {
     toArray,
+    isObject,
     invokeWithErrorHandling
 } from 'core/util/index'
 
@@ -59,9 +60,9 @@ export function internalMixin(Vue: Class<Component>) {
         }
         return oldEmit.apply(this, arguments)
     }
-    
-    Vue.prototype.$nextTick = function (fn: Function) {
-      return nextTick(this, fn)
+
+    Vue.prototype.$nextTick = function(fn: Function) {
+        return nextTick(this, fn)
     }
 
     MP_METHODS.forEach(method => {
@@ -104,14 +105,14 @@ export function internalMixin(Vue: Class<Component>) {
                 value = this._n(value)
             }
         }
-        if(!target){
+        if (!target) {
             target = this
         }
         target[key] = value
     }
 
     Vue.prototype.__set_sync = function(target, key, value) {
-        if(!target){
+        if (!target) {
             target = this
         }
         target[key] = value
@@ -140,6 +141,27 @@ export function internalMixin(Vue: Class<Component>) {
         const dynamicStyleObj = normalizeStyleBinding(dynamicStyle)
         const styleObj = staticStyle ? extend(staticStyle, dynamicStyleObj) : dynamicStyleObj
         return Object.keys(styleObj).map(name => `${hyphenate(name)}:${styleObj[name]}`).join(';')
+    }
+
+    Vue.prototype.__map = function(val, iteratee) {
+        //TODO 暂不考虑 string,number
+        let ret, i, l, keys, key
+        if (Array.isArray(val)) {
+            ret = new Array(val.length)
+            for (i = 0, l = val.length; i < l; i++) {
+                ret[i] = iteratee(val[i], i)
+            }
+            return ret
+        } else if (isObject(val)) {
+            keys = Object.keys(val)
+            ret = Object.create(null)
+            for (i = 0, l = keys.length; i < l; i++) {
+                key = keys[i]
+                ret[key] = iteratee(val[key], key, i)
+            }
+            return ret
+        }
+        return []
     }
 
 }
