@@ -21,11 +21,11 @@ const TAGS = {
         'class': ['hoverClass'],
         'style': []
     },
-    'input': {
+    'u-input': {
         'class': ['placeholderClass'],
         'style': ['placeholderStyle']
     },
-    'textarea': {
+    'u-textarea': {
         'class': ['placeholderClass'],
         'style': ['placeholderStyle']
     },
