@@ -4,7 +4,8 @@ import Vue from 'core/index'
 import config from 'core/config'
 import { extend, noop } from 'shared/util'
 import { mountComponent } from 'core/instance/lifecycle'
-import { devtools, inBrowser } from 'core/util/index'
+import { devtools, inBrowser, invokeWithErrorHandling } from 'core/util/index'
+import { pushTarget, popTarget } from 'core/observer/dep'
 
 import {
   query,
@@ -32,6 +33,25 @@ extend(Vue.options.components, platformComponents)
 
 // install platform patch function
 Vue.prototype.__patch__ = inBrowser ? patch : noop
+
+Vue.prototype.__call_hook = function(hook, args) {
+  const vm = this
+  // #7573 disable dep collection when invoking lifecycle hooks
+  pushTarget()
+  const handlers = vm.$options[hook]
+  const info = `${hook} hook`
+  let ret
+  if (handlers) {
+      for (let i = 0, j = handlers.length; i < j; i++) {
+          ret = invokeWithErrorHandling(handlers[i], vm, args ? [args] : null, vm, info)
+      }
+  }
+  if (vm._hasHookEvent) {
+      vm.$emit('hook:' + hook)
+  }
+  popTarget()
+  return ret
+}
 
 // public mount method
 Vue.prototype.$mount = function (

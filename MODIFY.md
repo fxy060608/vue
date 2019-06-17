@@ -1,3 +1,6 @@
+//h5
+src/platforms/weex/runtime/index callHook
+
 package.json
 .eslintrc.js
 scripts/alias.js
