@@ -92,6 +92,13 @@ function initProps (vm: Component, propsOptions: Object) {
                 return
             }
             //fixed by xxxxxx __next_tick_pending,uni://form-field 时不告警
+            if(
+                key === 'value' && 
+                Array.isArray(vm.$options.behaviors) &&
+                vm.$options.behaviors.indexOf('uni://form-field') !== -1
+              ){
+              return
+            }
             if(vm._getFormData){
               return
             }
