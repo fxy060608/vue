@@ -4969,7 +4969,12 @@ function model (
   el,
   dir
 ) {
-  if (el.tag === 'input' || el.tag === 'textarea') {
+  if (
+    el.tag === 'input' || 
+    el.tag === 'textarea' ||
+    el.tag === 'u-input' ||
+    el.tag === 'u-textarea'
+  ) {
     genDefaultModel(el, dir.value, dir.modifiers);
   } else {
     genComponentModel(el, dir.value, dir.modifiers);
