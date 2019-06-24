@@ -6745,6 +6745,16 @@ var parseStyleText = cached(function (cssText) {
   return res
 });
 
+// merge static and dynamic style data on the same vnode
+function normalizeStyleData (data) {
+  var style = normalizeStyleBinding(data.style);
+  // static style is pre-processed into an object during compilation
+  // and is always a fresh object, so it's safe to merge into it
+  return data.staticStyle
+    ? extend(data.staticStyle, style)
+    : style
+}
+
 // normalize possible array / string values into Object
 function normalizeStyleBinding (bindingStyle) {
   if (Array.isArray(bindingStyle)) {
@@ -6754,6 +6764,40 @@ function normalizeStyleBinding (bindingStyle) {
     return parseStyleText(bindingStyle)
   }
   return bindingStyle
+}
+
+/**
+ * parent component style should be after child's
+ * so that parent component's style could override it
+ */
+function getStyle (vnode, checkChild) {
+  var res = {};
+  var styleData;
+
+  if (checkChild) {
+    var childNode = vnode;
+    while (childNode.componentInstance) {
+      childNode = childNode.componentInstance._vnode;
+      if (
+        childNode && childNode.data &&
+        (styleData = normalizeStyleData(childNode.data))
+      ) {
+        extend(res, styleData);
+      }
+    }
+  }
+
+  if ((styleData = normalizeStyleData(vnode.data))) {
+    extend(res, styleData);
+  }
+
+  var parentNode = vnode;
+  while ((parentNode = parentNode.parent)) {
+    if (parentNode.data && (styleData = normalizeStyleData(parentNode.data))) {
+      extend(res, styleData);
+    }
+  }
+  return res
 }
 
 /*  */
@@ -6863,77 +6907,114 @@ var attrs = {
 
 /*  */
 
-function updateClass (oldVnode, vnode) {
-  var el = vnode.elm;
-  var ctx = vnode.context;
-
-  var data = vnode.data;
-  var oldData = oldVnode.data;
-  if (!data.staticClass &&
-    !data.class &&
-    (!oldData || (!oldData.staticClass && !oldData.class))
-  ) {
-    return
-  }
-
-  var oldClassList = makeClassList(oldData);
-  var classList = makeClassList(data);
-
-  if (typeof el.setClassList === 'function') {
-    el.setClassList(classList);
-  } else {
-    var style = getStyle$1(oldClassList, classList, ctx);
-    if (typeof el.setStyles === 'function') {
-      el.setStyles(style);
-    } else {
-      for (var key in style) {
-        el.setStyle(key, style[key]);
-      }
+function genClassStyleForVnode(vnode) {
+    var style = getClassStyleForVnode(vnode);
+    var parentNode = vnode;
+    var childNode = vnode;
+    while (isDef(childNode.componentInstance)) {
+        childNode = childNode.componentInstance._vnode;
+        if (childNode && childNode.data) {
+            style = extend(getClassStyleForVnode(childNode), style);
+        }
     }
-  }
+    while (isDef(parentNode = parentNode.parent)) {
+        if (parentNode && parentNode.data) {
+            style = extend(style, getClassStyleForVnode(parentNode));
+        }
+    }
+    return style
 }
 
-function makeClassList (data) {
-  var classList = [];
-  // unlike web, weex vnode staticClass is an Array
-  var staticClass = data.staticClass;
-  var dataClass = data.class;
-  if (staticClass) {
-    classList.push.apply(classList, staticClass);
-  }
-  if (Array.isArray(dataClass)) {
-    classList.push.apply(classList, dataClass);
-  } else if (isObject(dataClass)) {
-    classList.push.apply(classList, Object.keys(dataClass).filter(function (className) { return dataClass[className]; }));
-  } else if (typeof dataClass === 'string') {
-    classList.push.apply(classList, dataClass.trim().split(/\s+/));
-  }
-  return classList
+function getClassStyleForVnode(vnode) {
+    var data = vnode.data;
+    if (
+        isUndef(data.staticClass) &&
+        isUndef(data.class)
+    ) {
+        return {}
+    }
+
+    return getStyle$1(makeClassList(data), vnode.context)
 }
 
-function getStyle$1 (oldClassList, classList, ctx) {
-  // style is a weex-only injected object
-  // compiled from <style> tags in weex files
-  var stylesheet = ctx.$options.style || {};
-  var result = {};
-  classList.forEach(function (name) {
-    var style = stylesheet[name];
-    extend(result, style);
-  });
-  oldClassList.forEach(function (name) {
-    var style = stylesheet[name];
-    for (var key in style) {
-      if (!result.hasOwnProperty(key)) {
-        result[key] = '';
-      }
+function getStyle$1(classList, ctx) {
+    var stylesheet = ctx.$options.style || {};
+    var result = {};
+    classList.forEach(function (name) {
+        var style = stylesheet[name];
+        extend(result, style);
+    });
+    return result
+}
+
+function makeClassList(data) {
+    var classList = [];
+    // unlike web, weex vnode staticClass is an Array
+    var staticClass = data.staticClass;
+    var dataClass = data.class;
+    if (staticClass) {
+        classList.push.apply(classList, staticClass);
     }
-  });
-  return result
+    if (Array.isArray(dataClass)) {
+        classList.push.apply(classList, dataClass);
+    } else if (isObject(dataClass)) {
+        classList.push.apply(classList, Object.keys(dataClass).filter(function (className) { return dataClass[className]; }));
+    } else if (typeof dataClass === 'string') {
+        classList.push.apply(classList, dataClass.trim().split(/\s+/));
+    }
+    return classList
+}
+
+function updateElemStyle(el, newStyle, oldStyle, normalize) {
+    var cur, name;
+    var batchedStyles = {};
+
+    for (name in oldStyle) {
+        if (isUndef(newStyle[name])) {
+            batchedStyles[normalize(name)] = '';
+        }
+    }
+    for (name in newStyle) {
+        cur = newStyle[name];
+        if (cur !== oldStyle[name]) {
+            batchedStyles[normalize(name)] = cur;
+        }
+    }
+    el.setStyles(batchedStyles);
+}
+
+/*  */
+
+function updateClass(oldVnode, vnode) {
+    var data = vnode.data;
+    var oldData = oldVnode.data;
+    if (
+        isUndef(data.staticClass) &&
+        isUndef(data.class) && (
+            isUndef(oldData) || (
+                isUndef(oldData.staticClass) &&
+                isUndef(oldData.class)
+            )
+        )
+    ) {
+        return
+    }
+
+    updateElemStyle(
+        vnode.elm,
+        genClassStyleForVnode(vnode),
+        genClassStyleForVnode(oldVnode),
+        normalize
+    );
+}
+
+function normalize(name) { //class 已在编译阶段处理
+    return name
 }
 
 var klass = {
-  create: updateClass,
-  update: updateClass
+    create: updateClass,
+    update: updateClass
 };
 
 /*  */
@@ -6991,84 +7072,44 @@ var events = {
 
 /*  */
 
-var normalize = cached(camelize);
-
-function createStyle (oldVnode, vnode) {
-  if (!vnode.data.staticStyle) {
-    updateStyle(oldVnode, vnode);
-    return
-  }
-  var elm = vnode.elm;
-  var staticStyle = vnode.data.staticStyle;
-  var supportBatchUpdate = typeof elm.setStyles === 'function';
-  var batchedStyles = {};
-  for (var name in staticStyle) {
-    if (staticStyle[name]) {
-      supportBatchUpdate
-        ? (batchedStyles[normalize(name)] = staticStyle[name])
-        : elm.setStyle(normalize(name), staticStyle[name]);
-    }
-  }
-  if (supportBatchUpdate) {
-    elm.setStyles(batchedStyles);
-  }
-  updateStyle(oldVnode, vnode);
-}
+var normalize$1 = cached(camelize);
 
 function updateStyle (oldVnode, vnode) {
-  if (!oldVnode.data.style && !vnode.data.style) {
+  var data = vnode.data;
+  var oldData = oldVnode.data;
+
+  if (isUndef(data.staticStyle) && isUndef(data.style) &&
+    isUndef(oldData.staticStyle) && isUndef(oldData.style)
+  ) {
     return
   }
-  var cur, name;
-  var elm = vnode.elm;
-  var oldStyle = oldVnode.data.style || {};
-  var style = vnode.data.style || {};
 
-  var needClone = style.__ob__;
+  var el = vnode.elm;
+  var oldStaticStyle = oldData.staticStyle;
+  var oldStyleBinding = oldData.normalizedStyle || oldData.style || {};
 
-  // handle array syntax
-  if (Array.isArray(style)) {
-    style = vnode.data.style = toObject$1(style);
-  }
+  // if static style exists, stylebinding already merged into it when doing normalizeStyleData
+  var oldStyle = oldStaticStyle || oldStyleBinding;
 
-  // clone the style for future updates,
-  // in case the user mutates the style object in-place.
-  if (needClone) {
-    style = vnode.data.style = extend({}, style);
-  }
+  var style = normalizeStyleBinding(vnode.data.style) || {};
 
-  var supportBatchUpdate = typeof elm.setStyles === 'function';
-  var batchedStyles = {};
-  for (name in oldStyle) {
-    if (!style[name]) {
-      supportBatchUpdate
-        ? (batchedStyles[normalize(name)] = '')
-        : elm.setStyle(normalize(name), '');
-    }
-  }
-  for (name in style) {
-    cur = style[name];
-    supportBatchUpdate
-      ? (batchedStyles[normalize(name)] = cur)
-      : elm.setStyle(normalize(name), cur);
-  }
-  if (supportBatchUpdate) {
-    elm.setStyles(batchedStyles);
-  }
-}
+  // store normalized style under a different key for next diff
+  // make sure to clone it if it's reactive, since the user likely wants
+  // to mutate it.
+  vnode.data.normalizedStyle = isDef(style.__ob__)
+    ? extend({}, style)
+    : style;
 
-function toObject$1 (arr) {
-  var res = {};
-  for (var i = 0; i < arr.length; i++) {
-    if (arr[i]) {
-      extend(res, arr[i]);
-    }
-  }
-  return res
+  updateElemStyle(
+      el, 
+      getStyle(vnode, true), 
+      oldStyle,
+      normalize$1
+  );
 }
 
 var style = {
-  create: createStyle,
+  create: updateStyle,
   update: updateStyle
 };
 
