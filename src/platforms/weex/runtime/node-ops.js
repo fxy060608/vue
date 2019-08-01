@@ -20,18 +20,18 @@ export function createTextNode (text: string) {
 export function createComment (text: string) {
   return document.createComment(text)
 }
-
+const TEXT_TAG_NAME = process.env.UNI_USING_WEEX ? 'text' : 'u-text'
 export function insertBefore (
   node: WeexElement,
   target: WeexElement,
   before: WeexElement
 ) {
   if (target.nodeType === 3) {
-    if (node.type === 'u-text') {
+    if (node.type === TEXT_TAG_NAME) {
       node.setAttr('value', target.text)
       target.parentNode = node
     } else {
-      const text = createElement('u-text')
+      const text = createElement(TEXT_TAG_NAME)
       text.setAttr('value', target.text)
       node.insertBefore(text, before)
     }
@@ -50,11 +50,11 @@ export function removeChild (node: WeexElement, child: WeexElement) {
 
 export function appendChild (node: WeexElement, child: WeexElement) {
   if (child.nodeType === 3) {
-    if (node.type === 'u-text') {
+    if (node.type === TEXT_TAG_NAME) {
       node.setAttr('value', child.text)
       child.parentNode = node
     } else {
-      const text = createElement('u-text')
+      const text = createElement(TEXT_TAG_NAME)
       text.setAttr('value', child.text)
       node.appendChild(text)
     }
