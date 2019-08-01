@@ -8,7 +8,7 @@ export default function model (
   dir: ASTDirective
 ): ?boolean {
   if (
-    el.tag === 'input' || 
+    el.tag === 'input' ||
     el.tag === 'textarea' ||
     el.tag === 'u-input' ||
     el.tag === 'u-textarea'
@@ -28,6 +28,9 @@ function genDefaultModel (
   const event = lazy ? 'change' : 'input'
 
   let valueExpression = `$event.target.attr.value${trim ? '.trim()' : ''}`
+  if(process.env.UNI_USING_NVUE_COMPILER){
+    valueExpression = `$event.detail.value${trim ? '.trim()' : ''}`
+  }
   if (number) {
     valueExpression = `_n(${valueExpression})`
   }
