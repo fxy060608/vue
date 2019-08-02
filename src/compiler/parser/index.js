@@ -211,6 +211,20 @@ export function parse (
     shouldKeepComment: options.comments,
     outputSourceRange: options.outputSourceRange,
     start (tag, attrs, unary, start, end) {
+
+      if(__WEEX__){
+        if(!process.env.UNI_USING_WEEX){// <input focus/> => focus = true
+          attrs.forEach(attr => {
+            if(
+              attr.value === '' &&
+              (attr.start + attr.name.length) === attr.end
+            ){
+              attr.value = true
+            }
+          })
+        }
+      }
+
       // check namespace.
       // inherit parent ns if there is one
       const ns = (currentParent && currentParent.ns) || platformGetTagNamespace(tag)
