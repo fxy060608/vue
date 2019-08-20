@@ -46,7 +46,15 @@ export class Observer {
     def(value, '__ob__', this)
     if (Array.isArray(value)) {
       if (hasProto) {
-        protoAugment(value, arrayMethods)
+        if(__MP__){// fixed by xxxxxx 微信小程序使用 plugins 之后，数组方法被直接挂载到了数组对象上，需要执行 copyAugment 逻辑
+          if(value.push !== value.__proto__.push){
+            copyAugment(value, arrayMethods, arrayKeys)
+          } else {
+            protoAugment(value, arrayMethods)
+          }
+        } else {
+          protoAugment(value, arrayMethods)
+        }
       } else {
         copyAugment(value, arrayMethods, arrayKeys)
       }
