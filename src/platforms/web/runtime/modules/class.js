@@ -22,7 +22,8 @@ function updateClass (oldVnode: any, vnode: any) {
         isUndef(oldData.staticClass) &&
         isUndef(oldData.class)
       )
-    )
+    ) &&
+    isUndef(el.__wxsClass) // fixed by xxxxxx __wxsClass
   ) {
     return
   }
@@ -33,6 +34,11 @@ function updateClass (oldVnode: any, vnode: any) {
   const transitionClass = el._transitionClasses
   if (isDef(transitionClass)) {
     cls = concat(cls, stringifyClass(transitionClass))
+  }
+
+  // fixed by xxxxxx __wxsClass
+  if(el.__wxsClass){
+    cls = concat(cls, el.__wxsClass)
   }
 
   // set the class
