@@ -23,7 +23,8 @@ function updateClass (oldVnode: any, vnode: any) {
         isUndef(oldData.class)
       )
     ) &&
-    isUndef(el.__wxsClass) // fixed by xxxxxx __wxsClass
+    isUndef(el.__wxsAddClass) &&
+    isUndef(el.__wxsRemoveClass) // fixed by xxxxxx __wxsClass
   ) {
     return
   }
@@ -37,8 +38,20 @@ function updateClass (oldVnode: any, vnode: any) {
   }
 
   // fixed by xxxxxx __wxsClass
-  if(el.__wxsClass){
-    cls = concat(cls, el.__wxsClass)
+  if(Array.isArray(el.__wxsRemoveClass) && el.__wxsRemoveClass.length){
+    const clsArr = cls.split(/\s+/)
+    el.__wxsRemoveClass.forEach(removeCls=>{
+      const clsIndex = clsArr.findIndex(cls => cls === removeCls)
+      if (clsIndex !== -1) {
+        clsArr.splice(clsIndex, 1)
+      }
+    })
+    cls = clsArr.join(' ')
+    el.__wxsRemoveClass.length = 0
+  }
+
+  if(el.__wxsAddClass){
+    cls = concat(cls, el.__wxsAddClass)
   }
 
   // set the class

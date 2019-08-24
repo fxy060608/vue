@@ -1,6 +1,6 @@
 //h5
 src/platforms/web/runtime/modules/class __wxsClass
- src/platforms/web/runtime/modules/style __wxsStyle
+src/platforms/web/runtime/modules/style __wxsStyle
 
 package.json
 .eslintrc.js
