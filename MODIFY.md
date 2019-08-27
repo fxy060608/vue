@@ -1,3 +1,4 @@
+//src/sfc/parser.js customBlocks
 //h5
 src/platforms/web/runtime/modules/class __wxsClass
 src/platforms/web/runtime/modules/style __wxsStyle

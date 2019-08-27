@@ -7,6 +7,7 @@ import { makeMap } from 'shared/util'
 const splitRE = /\r?\n/g
 const replaceRE = /./g
 const isSpecialTag = makeMap('script,style,template', true)
+const isCustomBlock = makeMap('wxs,filter,sjs', true)// fixed by xxxxxx
 
 /**
  * Parse a single-file component (*.vue) file into an SFC Descriptor Object.
@@ -58,8 +59,8 @@ export function parseComponent (
           cumulated[name] = value || true
           return cumulated
         }, {})
-      }
-      if (isSpecialTag(tag)) {
+      }// fixed by xxxxxx
+      if (isSpecialTag(tag) && !isCustomBlock(currentBlock.attrs.lang || '')) {
         checkAttrs(currentBlock, attrs)
         if (tag === 'style') {
           sfc.styles.push(currentBlock)
@@ -116,7 +117,8 @@ export function parseComponent (
       return content.slice(0, block.start).replace(replaceRE, ' ')
     } else {
       const offset = content.slice(0, block.start).split(splitRE).length
-      const padChar = block.type === 'script' && !block.lang
+      const lang = block.attrs && block.attrs.lang // fixed by xxxxxx
+      const padChar = block.type === 'script' && !block.lang && !isCustomBlock(lang || '')
         ? '//\n'
         : '\n'
       return Array(offset).join(padChar)
