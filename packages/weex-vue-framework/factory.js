@@ -2,7 +2,7 @@
 
 
 
-module.exports = function weexFactory (exports, document) {
+module.exports = function weexFactory (exports, document, SharedObject) {
 
 /*  */
 
@@ -709,8 +709,8 @@ Dep.prototype.removeSub = function removeSub (sub) {
 };
 
 Dep.prototype.depend = function depend () {
-  if (Dep.target) {
-    Dep.target.addDep(this);
+  if (Dep.SharedObject.target) {
+    Dep.SharedObject.target.addDep(this);
   }
 };
 
@@ -731,17 +731,20 @@ Dep.prototype.notify = function notify () {
 // The current target watcher being evaluated.
 // This is globally unique because only one watcher
 // can be evaluated at a time.
-Dep.target = null;
+// fixed by xxxxxx (nvue shared vuex)
+/* eslint-disable no-undef */
+Dep.SharedObject = typeof SharedObject !== 'undefined' ? SharedObject : {};
+Dep.SharedObject.target = null;
 var targetStack = [];
 
 function pushTarget (target) {
   targetStack.push(target);
-  Dep.target = target;
+  Dep.SharedObject.target = target;
 }
 
 function popTarget () {
   targetStack.pop();
-  Dep.target = targetStack[targetStack.length - 1];
+  Dep.SharedObject.target = targetStack[targetStack.length - 1];
 }
 
 /*  */
@@ -908,7 +911,9 @@ var Observer = function Observer (value) {
   def(value, '__ob__', this);
   if (Array.isArray(value)) {
     if (hasProto) {
-      protoAugment(value, arrayMethods);
+      {
+        protoAugment(value, arrayMethods);
+      }
     } else {
       copyAugment(value, arrayMethods, arrayKeys);
     }
@@ -1020,7 +1025,7 @@ function defineReactive$$1 (
     configurable: true,
     get: function reactiveGetter () {
       var value = getter ? getter.call(obj) : val;
-      if (Dep.target) {
+      if (Dep.SharedObject.target) { // fixed by xxxxxx
         dep.depend();
         if (childOb) {
           childOb.dep.depend();
@@ -2515,7 +2520,12 @@ function resolveSlots (
         slot.push(child);
       }
     } else {
-      (slots.default || (slots.default = [])).push(child);
+      // fixed by xxxxxx 临时 hack 掉 uni-app 中的异步 name slot page
+      if(child.asyncMeta && child.asyncMeta.data && child.asyncMeta.data.slot === 'page'){
+        (slots['page'] || (slots['page'] = [])).push(child);
+      }else{
+        (slots.default || (slots.default = [])).push(child);
+      }
     }
   }
   // ignore slots that contains only whitespace
@@ -5021,7 +5031,7 @@ function createComputedGetter (key) {
       if (watcher.dirty) {
         watcher.evaluate();
       }
-      if (Dep.target) {
+      if (Dep.SharedObject.target) {// fixed by xxxxxx
         watcher.depend();
       }
       return watcher.value
@@ -5667,18 +5677,18 @@ function createTextNode (text) {
 function createComment (text) {
   return document.createComment(text)
 }
-
+var TEXT_TAG_NAME = process.env.UNI_USING_WEEX ? 'text' : 'u-text';
 function insertBefore (
   node,
   target,
   before
 ) {
   if (target.nodeType === 3) {
-    if (node.type === 'u-text') {
+    if (node.type === TEXT_TAG_NAME) {
       node.setAttr('value', target.text);
       target.parentNode = node;
     } else {
-      var text = createElement$1('u-text');
+      var text = createElement$1(TEXT_TAG_NAME);
       text.setAttr('value', target.text);
       node.insertBefore(text, before);
     }
@@ -5697,11 +5707,11 @@ function removeChild (node, child) {
 
 function appendChild (node, child) {
   if (child.nodeType === 3) {
-    if (node.type === 'u-text') {
+    if (node.type === TEXT_TAG_NAME) {
       node.setAttr('value', child.text);
       child.parentNode = node;
     } else {
-      var text = createElement$1('u-text');
+      var text = createElement$1(TEXT_TAG_NAME);
       text.setAttr('value', child.text);
       node.appendChild(text);
     }

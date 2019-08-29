@@ -23,7 +23,7 @@ export function createInstanceContext (
   }
 
   // Each instance has a independent `Vue` module instance
-  const Vue = instance.Vue = createVueModuleInstance(instanceId, weex)
+  const Vue = instance.Vue = createVueModuleInstance(instanceId, weex, runtimeContext.SharedObject)
 
   // DEPRECATED
   const timerAPIs = getInstanceTimer(instanceId, weex.requireModule)
@@ -77,10 +77,11 @@ export function refreshInstance (
  */
 function createVueModuleInstance (
   instanceId: string,
-  weex: Weex
+  weex: Weex,
+  SharedObject
 ): GlobalAPI {
   const exports = {}
-  VueFactory(exports, weex.document)
+  VueFactory(exports, weex.document, SharedObject)
   const Vue = exports.Vue
 
   const instance = instanceOptions[instanceId]

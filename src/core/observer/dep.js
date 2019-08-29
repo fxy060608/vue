@@ -29,8 +29,8 @@ export default class Dep {
   }
 
   depend () {
-    if (Dep.target) {
-      Dep.target.addDep(this)
+    if (Dep.SharedObject.target) {
+      Dep.SharedObject.target.addDep(this)
     }
   }
 
@@ -52,15 +52,18 @@ export default class Dep {
 // The current target watcher being evaluated.
 // This is globally unique because only one watcher
 // can be evaluated at a time.
-Dep.target = null
+// fixed by xxxxxx (nvue shared vuex)
+/* eslint-disable no-undef */
+Dep.SharedObject = typeof SharedObject !== 'undefined' ? SharedObject : {}
+Dep.SharedObject.target = null
 const targetStack = []
 
 export function pushTarget (target: ?Watcher) {
   targetStack.push(target)
-  Dep.target = target
+  Dep.SharedObject.target = target
 }
 
 export function popTarget () {
   targetStack.pop()
-  Dep.target = targetStack[targetStack.length - 1]
+  Dep.SharedObject.target = targetStack[targetStack.length - 1]
 }

@@ -1,4 +1,11 @@
 //src/sfc/parser.js customBlocks
+
+scripts/config.js SharedObject
+src/core/instance/state.js Dep.SharedObject.target
+src/core/observer/dep.js Dep.SharedObject.target
+src/core/observer/index.js Dep.SharedObject.target
+
+
 //h5
 src/platforms/web/runtime/modules/class __wxsClass
 src/platforms/web/runtime/modules/style __wxsStyle

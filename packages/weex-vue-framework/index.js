@@ -29,7 +29,7 @@ function createInstanceContext (
   };
 
   // Each instance has a independent `Vue` module instance
-  var Vue = instance.Vue = createVueModuleInstance(instanceId, weex);
+  var Vue = instance.Vue = createVueModuleInstance(instanceId, weex, runtimeContext.SharedObject);
 
   // DEPRECATED
   var timerAPIs = getInstanceTimer(instanceId, weex.requireModule);
@@ -83,10 +83,11 @@ function refreshInstance (
  */
 function createVueModuleInstance (
   instanceId,
-  weex
+  weex,
+  SharedObject
 ) {
   var exports = {};
-  VueFactory(exports, weex.document);
+  VueFactory(exports, weex.document, SharedObject);
   var Vue = exports.Vue;
 
   var instance = instanceOptions[instanceId];
