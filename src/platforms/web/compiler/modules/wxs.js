@@ -1,9 +1,5 @@
 /* @flow */
 
-import {
-  getBindingAttr
-} from 'compiler/helpers'
-
 function transformNode(el: ASTElement) {
   const list = el.attrsList
   for (let i = list.length - 1; i >= 0; i--) {
@@ -11,7 +7,7 @@ function transformNode(el: ASTElement) {
     if (name.indexOf(':change:') === 0 || name.indexOf('v-bind:change:') === 0) {
       const nameArr = name.split(':')
       const wxsProp = nameArr[nameArr.length - 1]
-      const wxsPropBinding = getBindingAttr(el, wxsProp, false)
+      const wxsPropBinding = el.attrsMap[':' + wxsProp] || el.attrsMap['v-bind:' + wxsProp]
       if (wxsPropBinding) {
         (el.wxsPropBindings || (el.wxsPropBindings = {}))['change:' + wxsProp] = wxsPropBinding
       }

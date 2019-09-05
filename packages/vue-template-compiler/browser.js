@@ -597,6 +597,7 @@
   var splitRE$1 = /\r?\n/g;
   var replaceRE = /./g;
   var isSpecialTag = makeMap('script,style,template', true);
+  var isCustomBlock = makeMap('wxs,filter,sjs', true);// fixed by xxxxxx
 
   /**
    * Parse a single-file component (*.vue) file into an SFC Descriptor Object.
@@ -653,8 +654,8 @@
             cumulated[name] = value || true;
             return cumulated
           }, {})
-        };
-        if (isSpecialTag(tag)) {
+        };// fixed by xxxxxx
+        if (isSpecialTag(tag) && !isCustomBlock(currentBlock.attrs.lang || '')) {
           checkAttrs(currentBlock, attrs);
           if (tag === 'style') {
             sfc.styles.push(currentBlock);
@@ -711,7 +712,8 @@
         return content.slice(0, block.start).replace(replaceRE, ' ')
       } else {
         var offset = content.slice(0, block.start).split(splitRE$1).length;
-        var padChar = block.type === 'script' && !block.lang
+        var lang = block.attrs && block.attrs.lang; // fixed by xxxxxx
+        var padChar = block.type === 'script' && !block.lang && !isCustomBlock(lang || '')
           ? '//\n'
           : '\n';
         return Array(offset).join(padChar)
@@ -1047,8 +1049,8 @@
   };
 
   Dep.prototype.depend = function depend () {
-    if (Dep.target) {
-      Dep.target.addDep(this);
+    if (Dep.SharedObject.target) {
+      Dep.SharedObject.target.addDep(this);
     }
   };
 
@@ -1063,7 +1065,11 @@
   // The current target watcher being evaluated.
   // This is globally unique because only one watcher
   // can be evaluated at a time.
-  Dep.target = null;
+  // fixed by xxxxxx (nvue shared vuex)
+  /* eslint-disable no-undef */
+  Dep.SharedObject = typeof SharedObject !== 'undefined' ? SharedObject : {};
+  Dep.SharedObject.target = null;
+  Dep.SharedObject.targetStack = [];
 
   /*  */
 
@@ -1182,7 +1188,9 @@
     def(value, '__ob__', this);
     if (Array.isArray(value)) {
       if (hasProto) {
-        protoAugment(value, arrayMethods);
+        {
+          protoAugment(value, arrayMethods);
+        }
       } else {
         copyAugment(value, arrayMethods, arrayKeys);
       }
@@ -1294,7 +1302,7 @@
       configurable: true,
       get: function reactiveGetter () {
         var value = getter ? getter.call(obj) : val;
-        if (Dep.target) {
+        if (Dep.SharedObject.target) { // fixed by xxxxxx
           dep.depend();
           if (childOb) {
             childOb.dep.depend();
@@ -1757,6 +1765,36 @@
 
   /*  */
 
+  function transformNode(el) {
+    var list = el.attrsList;
+    for (var i = list.length - 1; i >= 0; i--) {
+      var name = list[i].name;
+      if (name.indexOf(':change:') === 0 || name.indexOf('v-bind:change:') === 0) {
+        var nameArr = name.split(':');
+        var wxsProp = nameArr[nameArr.length - 1];
+        var wxsPropBinding = el.attrsMap[':' + wxsProp] || el.attrsMap['v-bind:' + wxsProp];
+        if (wxsPropBinding) {
+          (el.wxsPropBindings || (el.wxsPropBindings = {}))['change:' + wxsProp] = wxsPropBinding;
+        }
+      }
+    }
+  }
+
+  function genData(el) {
+    var data = '';
+    if (el.wxsPropBindings) {
+      data += "wxsProps:" + (JSON.stringify(el.wxsPropBindings)) + ",";
+    }
+    return data
+  }
+
+  var wxs = {
+    transformNode: transformNode,
+    genData: genData
+  };
+
+  /*  */
+
   var validDivisionCharRE = /[\w).+\-_$\]]/;
 
   function parseFilters (exp) {
@@ -2132,7 +2170,7 @@
 
   /*  */
 
-  function transformNode (el, options) {
+  function transformNode$1 (el, options) {
     var warn = options.warn || baseWarn;
     var staticClass = getAndRemoveAttr(el, 'class');
     if (staticClass) {
@@ -2156,7 +2194,7 @@
     }
   }
 
-  function genData (el) {
+  function genData$1 (el) {
     var data = '';
     if (el.staticClass) {
       data += "staticClass:" + (el.staticClass) + ",";
@@ -2169,8 +2207,8 @@
 
   var klass = {
     staticKeys: ['staticClass'],
-    transformNode: transformNode,
-    genData: genData
+    transformNode: transformNode$1,
+    genData: genData$1
   };
 
   /*  */
@@ -2190,7 +2228,7 @@
 
   /*  */
 
-  function transformNode$1 (el, options) {
+  function transformNode$2 (el, options) {
     var warn = options.warn || baseWarn;
     var staticStyle = getAndRemoveAttr(el, 'style');
     if (staticStyle) {
@@ -2216,7 +2254,7 @@
     }
   }
 
-  function genData$1 (el) {
+  function genData$2 (el) {
     var data = '';
     if (el.staticStyle) {
       data += "staticStyle:" + (el.staticStyle) + ",";
@@ -2229,8 +2267,8 @@
 
   var style = {
     staticKeys: ['staticStyle'],
-    transformNode: transformNode$1,
-    genData: genData$1
+    transformNode: transformNode$2,
+    genData: genData$2
   };
 
   var commonjsGlobal = typeof window !== 'undefined' ? window : typeof global !== 'undefined' ? global : typeof self !== 'undefined' ? self : {};
@@ -2915,6 +2953,7 @@
       shouldKeepComment: options.comments,
       outputSourceRange: options.outputSourceRange,
       start: function start (tag, attrs, unary, start$1, end) {
+
         // check namespace.
         // inherit parent ns if there is one
         var ns = (currentParent && currentParent.ns) || platformGetTagNamespace(tag);
@@ -3745,6 +3784,7 @@
   };
 
   var modules = [
+    wxs,// fixed by xxxxxx
     klass,
     style,
     model
@@ -4326,7 +4366,7 @@
       } else {
         var data;
         if (!el.plain || (el.pre && state.maybeComponent(el))) {
-          data = genData$2(el, state);
+          data = genData$3(el, state);
         }
 
         var children = el.inlineTemplate ? null : genChildren(el, state, true);
@@ -4452,7 +4492,7 @@
       '})'
   }
 
-  function genData$2 (el, state) {
+  function genData$3 (el, state) {
     var data = '{';
 
     // directives first.
@@ -4785,7 +4825,7 @@
     state
   ) {
     var children = el.inlineTemplate ? null : genChildren(el, state, true);
-    return ("_c(" + componentName + "," + (genData$2(el, state)) + (children ? ("," + children) : '') + ")")
+    return ("_c(" + componentName + "," + (genData$3(el, state)) + (children ? ("," + children) : '') + ")")
   }
 
   function genProps (props) {
@@ -5536,7 +5576,7 @@
   }
 
   function genNormalElement (el, state, stringifyChildren) {
-    var data = el.plain ? undefined : genData$2(el, state);
+    var data = el.plain ? undefined : genData$3(el, state);
     var children = stringifyChildren
       ? ("[" + (genChildrenAsStringNode(el, state)) + "]")
       : genSSRChildren(el, state, true);
