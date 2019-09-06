@@ -60,7 +60,7 @@ export function parseComponent (
           return cumulated
         }, {})
       }// fixed by xxxxxx
-      if (isSpecialTag(tag) && !isCustomBlock(currentBlock.attrs.lang || '')) {
+      if (isSpecialTag(tag) && !isCustomBlock(String(currentBlock.attrs.lang || ''))) {
         checkAttrs(currentBlock, attrs)
         if (tag === 'style') {
           sfc.styles.push(currentBlock)
@@ -118,7 +118,7 @@ export function parseComponent (
     } else {
       const offset = content.slice(0, block.start).split(splitRE).length
       const lang = block.attrs && block.attrs.lang // fixed by xxxxxx
-      const padChar = block.type === 'script' && !block.lang && !isCustomBlock(lang || '')
+      const padChar = block.type === 'script' && !block.lang && !isCustomBlock(String(lang || ''))
         ? '//\n'
         : '\n'
       return Array(offset).join(padChar)
