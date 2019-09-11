@@ -1,8 +1,8 @@
 /* @flow */
-
-const fnExpRE = /^([\w$_]+|\([^)]*?\))\s*=>|^function\s*(?:[\w$]+)?\s*\(/
+import { genWeexHandlerWithParams, genWeexHandler } from 'weex/compiler/modules/event'
+export const fnExpRE = /^([\w$_]+|\([^)]*?\))\s*=>|^function\s*(?:[\w$]+)?\s*\(/
 const fnInvokeRE = /\([^)]*?\);*$/
-const simplePathRE = /^[A-Za-z_$][\w$]*(?:\.[A-Za-z_$][\w$]*|\['[^']*?']|\["[^"]*?"]|\[\d+]|\[[A-Za-z_$][\w$]*])*$/
+export const simplePathRE = /^[A-Za-z_$][\w$]*(?:\.[A-Za-z_$][\w$]*|\['[^']*?']|\["[^"]*?"]|\[\d+]|\[[A-Za-z_$][\w$]*])*$/
 
 // KeyboardEvent.keyCode aliases
 const keyCodes: { [key: string]: number | Array<number> } = {
@@ -54,13 +54,14 @@ const modifierCode: { [key: string]: string } = {
 
 export function genHandlers (
   events: ASTElementHandlers,
-  isNative: boolean
+  isNative: boolean,
+  options: CompilerOptions
 ): string {
   const prefix = isNative ? 'nativeOn:' : 'on:'
   let staticHandlers = ``
   let dynamicHandlers = ``
   for (const name in events) {
-    const handlerCode = genHandler(events[name])
+    const handlerCode = genHandler(events[name], options)
     if (events[name] && events[name].dynamic) {
       dynamicHandlers += `${name},${handlerCode},`
     } else {
@@ -75,44 +76,29 @@ export function genHandlers (
   }
 }
 
-// Generate handler code with binding params on Weex
-/* istanbul ignore next */
-function genWeexHandler (params: Array<any>, handlerCode: string) {
-  let innerHandlerCode = handlerCode
-  const exps = params.filter(exp => simplePathRE.test(exp) && exp !== '$event')
-  const bindings = exps.map(exp => ({ '@binding': exp }))
-  const args = exps.map((exp, i) => {
-    const key = `$_${i + 1}`
-    innerHandlerCode = innerHandlerCode.replace(exp, key)
-    return key
-  })
-  args.push('$event')
-  return '{\n' +
-    `handler:function(${args.join(',')}){${innerHandlerCode}},\n` +
-    `params:${JSON.stringify(bindings)}\n` +
-    '}'
-}
-
-function genHandler (handler: ASTElementHandler | Array<ASTElementHandler>): string {
+function genHandler (handler: ASTElementHandler | Array<ASTElementHandler>, options: CompilerOptions): string {
   if (!handler) {
     return 'function(){}'
   }
 
   if (Array.isArray(handler)) {
-    return `[${handler.map(handler => genHandler(handler)).join(',')}]`
+    return `[${handler.map(handler => genHandler(handler, options)).join(',')}]`
   }
 
   const isMethodPath = simplePathRE.test(handler.value)
   const isFunctionExpression = fnExpRE.test(handler.value)
   const isFunctionInvocation = simplePathRE.test(handler.value.replace(fnInvokeRE, ''))
 
-  if (!handler.modifiers) {
+  // Weex does not support modifiers
+    if (__WEEX__) {
+      return genWeexHandler(handler, options)
+    } else if (!handler.modifiers) {
     if (isMethodPath || isFunctionExpression) {
       return handler.value
     }
     /* istanbul ignore if */
     if (__WEEX__ && handler.params) {
-      return genWeexHandler(handler.params, handler.value)
+      return genWeexHandlerWithParams(handler.params, handler.value)
     }
     return `function($event){${
       isFunctionInvocation ? `return ${handler.value}` : handler.value
@@ -156,7 +142,7 @@ function genHandler (handler: ASTElementHandler | Array<ASTElementHandler>): str
           : handler.value
     /* istanbul ignore if */
     if (__WEEX__ && handler.params) {
-      return genWeexHandler(handler.params, code + handlerCode)
+      return genWeexHandlerWithParams(code + handlerCode)
     }
     return `function($event){${code}${handlerCode}}`
   }

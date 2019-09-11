@@ -22,14 +22,14 @@
       },
       children: [{
         type: 'text',
-        classList: ['output'],
+        style: { fontSize: '150px', textAlign: 'center' },
         attr: {
           value: { '@binding': 'count' } // need confirm
         }
       }, {
         type: 'text',
         event: ['click'],
-        classList: ['button'],
+        style: { fontSize: '100px', textAlign: 'center', borderWidth: '2px', borderColor: '#DDDDDD', backgroundColor: '#F5F5F5' },
         attr: { value: '+' }
       }]
     }, {

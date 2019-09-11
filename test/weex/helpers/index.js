@@ -4,7 +4,7 @@ import * as Vue from '../../../packages/weex-vue-framework'
 import { compile } from '../../../packages/weex-template-compiler'
 import WeexRuntime from 'weex-js-runtime'
 import styler from 'weex-styler'
-
+process.env.UNI_USING_WEEX = true
 const styleRE = /<\s*style\s*\w*>([^(<\/)]*)<\/\s*style\s*>/g
 const scriptRE = /<\s*script.*>([^]*)<\/\s*script\s*>/
 const templateRE = /<\s*template\s*([^>]*)>([^]*)<\/\s*template\s*>/
@@ -112,11 +112,13 @@ function isEmptyObject (object) {
   return isObject(object) && Object.keys(object).length < 1
 }
 
-function omitUseless (object) {
+function omitUseless (object, parentKey) {
   if (isObject(object)) {
-    delete object.ref
+    if (parentKey !== 'attr') {
+      delete object.ref
+    }
     for (const key in object) {
-      omitUseless(object[key])
+      omitUseless(object[key], key)
       if (key === '@styleScope' ||
         key === '@templateId' ||
         key === 'bindingExpression') {
@@ -125,6 +127,14 @@ function omitUseless (object) {
       if (key.charAt(0) !== '@' &&
         (isEmptyObject(object[key]) || object[key] === undefined)) {
         delete object[key]
+      }
+      if (key === 'event' && Array.isArray(object[key])) {
+        object.event = object.event.filter(name => {
+          return name !== '_attach_slot' && name !== '_detach_slot'
+        })
+        if (!object.event.length) {
+          delete object.event
+        }
       }
     }
   }
@@ -142,7 +152,9 @@ export function getEvents (instance) {
     if (!node) { return }
     if (Array.isArray(node.event)) {
       node.event.forEach(type => {
-        events.push({ ref: node.ref, type })
+        if (type !== '_attach_slot' && type !== '_detach_slot') {
+          events.push({ ref: node.ref, type })
+        }
       })
     }
     if (Array.isArray(node.children)) {
@@ -153,10 +165,11 @@ export function getEvents (instance) {
   return events
 }
 
-export function fireEvent (instance, ref, type, event = {}) {
+export function fireEvent (instance, ref, type, event = {}, params) {
   const el = instance.document.getRef(ref)
   if (el) {
-    instance.document.fireEvent(el, type, event)
+    const _type = typeof type === 'string' ? type : type.type || ''
+    instance.document.fireEvent(el, _type, event, {}, { params })
   }
 }
 
@@ -164,8 +177,16 @@ export function createInstance (id, code, ...args) {
   WeexRuntime.config.frameworks = { Vue }
   const context = WeexRuntime.init(WeexRuntime.config)
   context.registerModules({
-    timer: ['setTimeout', 'setInterval']
+    timer: ['setTimeout', 'clearTimeout', 'setInterval', 'clearInterval'],
+    modal: ['toast', 'alert']
   })
+  context.registerComponents([{
+    type: 'recycle-list',
+    methods: [
+      'appendData', 'removeData', 'insertData',
+      'updateData', 'insertRange', 'setListData'
+    ]
+  }])
   const instance = context.createInstance(id, `// { "framework": "Vue" }\n${code}`, ...args) || {}
   instance.document = context.getDocument(id)
   instance.$getRoot = () => context.getRoot(id)
@@ -175,7 +196,7 @@ export function createInstance (id, code, ...args) {
     context.destroyInstance(id)
   }
   instance.$triggerHook = (id, hook, args) => {
-    instance.document.taskCenter.triggerHook(id, 'lifecycle', hook, { args })
+    return instance.document.taskCenter.triggerHook(id, 'lifecycle', hook, args)
   }
   return instance
 }

@@ -62,6 +62,7 @@ function makeClassList(data: VNodeData) {
     } else if (typeof dataClass === 'string') {
         classList.push.apply(classList, dataClass.trim().split(/\s+/))
     }
+
     return classList
 }
 

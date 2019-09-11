@@ -58,7 +58,7 @@ declare interface WeexTaskCenter {
   callbackManager: Object;
   send: (type: string, params: Object, args: Array<any>, options?: Object) => void;
   registerHook: (componentId: string, type: string, hook: string, fn: Function) => void;
-  updateData: (componentId: string, data: Object | void, callback?: Function) => void;
+  updateData: (componentId: string, data: Object | Array<any> | void, callback?: Function) => void;
 };
 
 declare interface WeexElement {
@@ -120,3 +120,18 @@ declare type WeexCompilerOptions = CompilerOptions & {
 declare type WeexCompiledResult = CompiledResult & {
   '@render'?: string;
 };
+
+declare type WeexVirtalElement = {
+  attrs: Object;
+  type: string;
+  ref: string;
+  '[[VirtualElement]]': true;
+}
+
+declare type WeexComponentHookInstance = {
+  virtualComponentId?: string;
+  position: number;
+  refs: {
+    [string]: Array<WeexVirtalElement>
+  }
+}

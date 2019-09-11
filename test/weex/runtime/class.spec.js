@@ -17,7 +17,7 @@ describe('generate class', () => {
         type: 'div',
         children: [{
           type: 'text',
-          classList: ['a', 'b', 'c'],
+          style: { fontSize: '100', color: '#ff0000', fontWeight: 'bold' },
           attr: { value: 'Hello World' }
         }]
       })
@@ -51,7 +51,7 @@ describe('generate class', () => {
         event: ['click'],
         children: [{
           type: 'text',
-          classList: ['a', 'b'],
+          style: { fontSize: '100', color: '#ff0000' },
           attr: { value: 'Hello World' }
         }]
       })
@@ -63,7 +63,7 @@ describe('generate class', () => {
         event: ['click'],
         children: [{
           type: 'text',
-          classList: ['a', 'd'],
+          style: { fontSize: '100', color: '#0000ff', fontWeight: 'bold' },
           attr: { value: 'Hello World' }
         }]
       })
@@ -96,7 +96,7 @@ describe('generate class', () => {
         event: ['click'],
         children: [{
           type: 'text',
-          classList: ['b', 'a'],
+          style: { color: '#ff0000' },
           attr: { value: 'Hello World' }
         }]
       })
@@ -108,7 +108,7 @@ describe('generate class', () => {
         event: ['click'],
         children: [{
           type: 'text',
-          classList: ['b', 'a', 'c'],
+          style: { color: '#0000ff' },
           attr: { value: 'Hello World' }
         }]
       })
@@ -139,7 +139,7 @@ describe('generate class', () => {
         event: ['click'],
         children: [{
           type: 'text',
-          classList: ['a', 'b'],
+          style: { fontSize: '100', color: '#ff0000' },
           attr: { value: 'Hello World' }
         }]
       })
@@ -151,7 +151,7 @@ describe('generate class', () => {
         event: ['click'],
         children: [{
           type: 'text',
-          classList: ['a', 'c'],
+          style: { fontSize: '100', color: '', fontWeight: 'bold' },
           attr: { value: 'Hello World' }
         }]
       })

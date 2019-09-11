@@ -22,8 +22,8 @@ src/core/observer/scheduler.js(export const queue)
 src/platforms/web/runtime/modules/style.js transformUnit
 
 //weex
-src/core/instance/lifecycle
-src/core/vdom/patch
+
+[recycle-list](https://github.com/f2009/vue/commit/2eab5b9aa42d06be79f5d535568cd3951b7a9743)
 
 
 src/platforms/weex/entry-compiler parseComponent

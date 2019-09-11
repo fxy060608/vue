@@ -19,10 +19,8 @@
         '@isComponentRoot': true,
         '@componentProps': {}
       },
-      classList: ['banner'],
       children: [{
         type: 'text',
-        classList: ['title'],
         attr: { value: 'BANNER' }
       }]
     }, {
@@ -34,10 +32,10 @@
         '@isComponentRoot': true,
         '@componentProps': {}
       },
-      classList: ['footer'],
+      style: { height: '80px', justifyContent: 'center', backgroundColor: '#EEEEEE' },
       children: [{
         type: 'text',
-        classList: ['copyright'],
+        style: { color: '#AAAAAA', fontSize: '32px', textAlign: 'center' },
         attr: { value: 'All rights reserved.' }
       }]
     }]
@@ -50,10 +48,8 @@
         '@isComponentRoot': true,
         '@componentProps': {}
       },
-      classList: ['banner'],
       children: [{
         type: 'text',
-        classList: ['title'],
         attr: { value: 'BANNER' }
       }]
     }, {
@@ -67,13 +63,13 @@
       },
       children: [{
         type: 'image',
-        classList: ['image'],
+        style: { width: '750px', height: '1000px' },
         attr: {
           src: { '@binding': 'imageUrl' }
         }
       }, {
         type: 'text',
-        classList: ['title'],
+        style: { fontSize: '80px', textAlign: 'center', color: '#E95659' },
         attr: {
           value: { '@binding': 'title' }
         }

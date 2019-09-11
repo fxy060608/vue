@@ -257,10 +257,10 @@ export function genData (el: ASTElement, state: CodegenState): string {
   }
   // event handlers
   if (el.events) {
-    data += `${genHandlers(el.events, false)},`
+    data += `${genHandlers(el.events, false, state.options)},`
   }
   if (el.nativeEvents) {
-    data += `${genHandlers(el.nativeEvents, true)},`
+    data += `${genHandlers(el.nativeEvents, true, state.options)},`
   }
   // slot target
   // only for non-scoped slots

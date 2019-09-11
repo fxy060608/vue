@@ -1,7 +1,7 @@
 <template>
   <recycle-list for="item in longList" switch="type">
     <cell-slot case="A">
-      <image resize="cover" :src="item.source">
+      <image resize="cover" :src="item.source" ref="image">
       <text lines="3" v-bind:count="item.count"></text>
     </cell-slot>
   </recycle-list>

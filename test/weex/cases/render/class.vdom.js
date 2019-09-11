@@ -2,18 +2,38 @@
   type: 'div',
   children: [{
     type: 'div',
-    classList: ['box', 'box1']
+    style: {
+      width: '100px',
+      height: '100px',
+      backgroundColor: '#DDDDDD'
+    }
   }, {
     type: 'div',
-    classList: ['box', 'box2']
+    style: {
+      width: '100px',
+      height: '100px',
+      backgroundColor: '#CCCCCC'
+    }
   }, {
     type: 'div',
-    classList: ['box', 'box3']
+    style: {
+      width: '100px',
+      height: '100px',
+      backgroundColor: '#BBBBBB'
+    }
   }, {
     type: 'div',
-    classList: ['box', 'box4']
+    style: {
+      width: '100px',
+      height: '100px',
+      backgroundColor: '#AAAAAA'
+    }
   }, {
     type: 'div',
-    classList: ['box', 'box5']
+    style: {
+      width: '100px',
+      height: '100px',
+      backgroundColor: '#999999'
+    }
   }]
 })

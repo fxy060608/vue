@@ -18,10 +18,8 @@
         '@isComponentRoot': true,
         '@componentProps': {}
       },
-      classList: ['banner'],
       children: [{
         type: 'text',
-        classList: ['title'],
         attr: {
           value: 'BANNER'
         }

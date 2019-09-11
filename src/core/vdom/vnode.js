@@ -39,6 +39,11 @@ export default class VNode {
     componentOptions?: VNodeComponentOptions,
     asyncFactory?: Function
   ) {
+    if(__WEEX__){// fixed by xxxxxx 后续优化
+      if(data && Array.isArray(data.class)){
+        data.class = data.class.slice(0)
+      }
+    }
     this.tag = tag
     this.data = data
     this.children = children

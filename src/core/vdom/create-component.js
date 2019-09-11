@@ -34,7 +34,12 @@ import {
 
 // inline hooks to be invoked on component VNodes during patch
 const componentVNodeHooks = {
-  init (vnode: VNodeWithData, hydrating: boolean): ?boolean {
+  init (
+    vnode: VNodeWithData, 
+    hydrating: boolean, 
+    parentElm: ?Node, 
+    refElm: ?Node,
+  ): ?boolean {
     if (
       vnode.componentInstance &&
       !vnode.componentInstance._isDestroyed &&
@@ -46,7 +51,9 @@ const componentVNodeHooks = {
     } else {
       const child = vnode.componentInstance = createComponentInstanceForVnode(
         vnode,
-        activeInstance
+        activeInstance,
+        parentElm,
+        refElm
       )
       child.$mount(hydrating ? vnode.elm : undefined, hydrating)
     }
@@ -208,11 +215,15 @@ export function createComponent (
 export function createComponentInstanceForVnode (
   vnode: any, // we know it's MountedComponentVNode but flow doesn't
   parent: any, // activeInstance in lifecycle state
+  parentElm?: ?Node,
+  refElm?: ?Node
 ): Component {
   const options: InternalComponentOptions = {
     _isComponent: true,
     _parentVnode: vnode,
-    parent
+    parent,
+    _parentElm: parentElm || null,
+    _refElm: refElm || null
   }
   // check inline-template render functions
   const inlineTemplate = vnode.data.inlineTemplate

@@ -19,7 +19,8 @@
         resize: 'cover',
         src: {
           '@binding': 'item.source'
-        }
+        },
+        ref: 'image'
       }
     }, {
       type: 'text',

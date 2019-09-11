@@ -8,6 +8,10 @@
     attr: {
       value: 'Yo'
     },
-    classList: ['freestyle']
+    style: {
+      color: '#41B883',
+      fontSize: '233px',
+      textAlign: 'center'
+    }
   }]
 })
