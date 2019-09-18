@@ -22,8 +22,6 @@ src/core/observer/scheduler.js(export const queue)
 src/platforms/web/runtime/modules/style.js transformUnit
 
 //weex
-src/core/instance/lifecycle
-src/core/vdom/patch
 
 
 src/platforms/weex/entry-compiler parseComponent
