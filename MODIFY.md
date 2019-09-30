@@ -7,8 +7,10 @@ src/core/observer/index.js Dep.SharedObject.target
 
 
 //h5
+src/platforms/web/runtime/index.js  __call_hook
 src/platforms/web/runtime/modules/class __wxsClass
 src/platforms/web/runtime/modules/style __wxsStyle
+
 
 package.json
 .eslintrc.js
