@@ -255,8 +255,8 @@
 
   /*  */
 
-  var isUnaryTag = makeMap(
-    'area,base,br,col,embed,frame,hr,img,input,isindex,keygen,' +
+  var isUnaryTag = makeMap(// fixed by xxxxxx add image
+    'image,area,base,br,col,embed,frame,hr,img,input,isindex,keygen,' +
     'link,meta,param,source,track,wbr'
   );
 
@@ -1036,7 +1036,13 @@
    * directives subscribing to it.
    */
   var Dep = function Dep () {
-    this.id = uid++;
+    // fixed by xxxxxx (nvue vuex)
+    /* eslint-disable no-undef */
+    if(typeof SharedObject !== 'undefined'){
+      this.id = SharedObject.uid++;
+    } else {
+      this.id = uid++;
+    }
     this.subs = [];
   };
 
@@ -1765,36 +1771,6 @@
 
   /*  */
 
-  function transformNode(el) {
-    var list = el.attrsList;
-    for (var i = list.length - 1; i >= 0; i--) {
-      var name = list[i].name;
-      if (name.indexOf(':change:') === 0 || name.indexOf('v-bind:change:') === 0) {
-        var nameArr = name.split(':');
-        var wxsProp = nameArr[nameArr.length - 1];
-        var wxsPropBinding = el.attrsMap[':' + wxsProp] || el.attrsMap['v-bind:' + wxsProp];
-        if (wxsPropBinding) {
-          (el.wxsPropBindings || (el.wxsPropBindings = {}))['change:' + wxsProp] = wxsPropBinding;
-        }
-      }
-    }
-  }
-
-  function genData(el) {
-    var data = '';
-    if (el.wxsPropBindings) {
-      data += "wxsProps:" + (JSON.stringify(el.wxsPropBindings)) + ",";
-    }
-    return data
-  }
-
-  var wxs = {
-    transformNode: transformNode,
-    genData: genData
-  };
-
-  /*  */
-
   var validDivisionCharRE = /[\w).+\-_$\]]/;
 
   function parseFilters (exp) {
@@ -2170,7 +2146,7 @@
 
   /*  */
 
-  function transformNode$1 (el, options) {
+  function transformNode (el, options) {
     var warn = options.warn || baseWarn;
     var staticClass = getAndRemoveAttr(el, 'class');
     if (staticClass) {
@@ -2194,7 +2170,7 @@
     }
   }
 
-  function genData$1 (el) {
+  function genData (el) {
     var data = '';
     if (el.staticClass) {
       data += "staticClass:" + (el.staticClass) + ",";
@@ -2207,8 +2183,8 @@
 
   var klass = {
     staticKeys: ['staticClass'],
-    transformNode: transformNode$1,
-    genData: genData$1
+    transformNode: transformNode,
+    genData: genData
   };
 
   /*  */
@@ -2228,7 +2204,7 @@
 
   /*  */
 
-  function transformNode$2 (el, options) {
+  function transformNode$1 (el, options) {
     var warn = options.warn || baseWarn;
     var staticStyle = getAndRemoveAttr(el, 'style');
     if (staticStyle) {
@@ -2254,7 +2230,7 @@
     }
   }
 
-  function genData$2 (el) {
+  function genData$1 (el) {
     var data = '';
     if (el.staticStyle) {
       data += "staticStyle:" + (el.staticStyle) + ",";
@@ -2267,8 +2243,8 @@
 
   var style = {
     staticKeys: ['staticStyle'],
-    transformNode: transformNode$2,
-    genData: genData$2
+    transformNode: transformNode$1,
+    genData: genData$1
   };
 
   var commonjsGlobal = typeof window !== 'undefined' ? window : typeof global !== 'undefined' ? global : typeof self !== 'undefined' ? self : {};
@@ -3781,6 +3757,36 @@
 
   var model = {
     preTransformNode: preTransformNode
+  };
+
+  /*  */
+
+  function transformNode$2(el) {
+    var list = el.attrsList;
+    for (var i = list.length - 1; i >= 0; i--) {
+      var name = list[i].name;
+      if (name.indexOf(':change:') === 0 || name.indexOf('v-bind:change:') === 0) {
+        var nameArr = name.split(':');
+        var wxsProp = nameArr[nameArr.length - 1];
+        var wxsPropBinding = el.attrsMap[':' + wxsProp] || el.attrsMap['v-bind:' + wxsProp];
+        if (wxsPropBinding) {
+          (el.wxsPropBindings || (el.wxsPropBindings = {}))['change:' + wxsProp] = wxsPropBinding;
+        }
+      }
+    }
+  }
+
+  function genData$2(el) {
+    var data = '';
+    if (el.wxsPropBindings) {
+      data += "wxsProps:" + (JSON.stringify(el.wxsPropBindings)) + ",";
+    }
+    return data
+  }
+
+  var wxs = {
+    transformNode: transformNode$2,
+    genData: genData$2
   };
 
   var modules = [

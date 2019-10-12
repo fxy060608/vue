@@ -212,8 +212,8 @@ function genStaticKeys (modules) {
 
 /*  */
 
-var isUnaryTag = makeMap(
-  'area,base,br,col,embed,frame,hr,img,input,isindex,keygen,' +
+var isUnaryTag = makeMap(// fixed by xxxxxx add image
+  'image,area,base,br,col,embed,frame,hr,img,input,isindex,keygen,' +
   'link,meta,param,source,track,wbr'
 );
 
@@ -994,7 +994,13 @@ var uid = 0;
  * directives subscribing to it.
  */
 var Dep = function Dep () {
-  this.id = uid++;
+  // fixed by xxxxxx (nvue vuex)
+  /* eslint-disable no-undef */
+  if(typeof SharedObject !== 'undefined'){
+    this.id = SharedObject.uid++;
+  } else {
+    this.id = uid++;
+  }
   this.subs = [];
 };
 
@@ -1730,36 +1736,6 @@ var isTextInputType = makeMap('text,number,password,search,email,tel,url');
 
 /*  */
 
-function transformNode(el) {
-  var list = el.attrsList;
-  for (var i = list.length - 1; i >= 0; i--) {
-    var name = list[i].name;
-    if (name.indexOf(':change:') === 0 || name.indexOf('v-bind:change:') === 0) {
-      var nameArr = name.split(':');
-      var wxsProp = nameArr[nameArr.length - 1];
-      var wxsPropBinding = el.attrsMap[':' + wxsProp] || el.attrsMap['v-bind:' + wxsProp];
-      if (wxsPropBinding) {
-        (el.wxsPropBindings || (el.wxsPropBindings = {}))['change:' + wxsProp] = wxsPropBinding;
-      }
-    }
-  }
-}
-
-function genData(el) {
-  var data = '';
-  if (el.wxsPropBindings) {
-    data += "wxsProps:" + (JSON.stringify(el.wxsPropBindings)) + ",";
-  }
-  return data
-}
-
-var wxs = {
-  transformNode: transformNode,
-  genData: genData
-};
-
-/*  */
-
 var validDivisionCharRE = /[\w).+\-_$\]]/;
 
 function parseFilters (exp) {
@@ -2135,7 +2111,7 @@ function rangeSetItem (
 
 /*  */
 
-function transformNode$1 (el, options) {
+function transformNode (el, options) {
   var warn = options.warn || baseWarn;
   var staticClass = getAndRemoveAttr(el, 'class');
   if (process.env.NODE_ENV !== 'production' && staticClass) {
@@ -2159,7 +2135,7 @@ function transformNode$1 (el, options) {
   }
 }
 
-function genData$1 (el) {
+function genData (el) {
   var data = '';
   if (el.staticClass) {
     data += "staticClass:" + (el.staticClass) + ",";
@@ -2172,8 +2148,8 @@ function genData$1 (el) {
 
 var klass = {
   staticKeys: ['staticClass'],
-  transformNode: transformNode$1,
-  genData: genData$1
+  transformNode: transformNode,
+  genData: genData
 };
 
 /*  */
@@ -2193,7 +2169,7 @@ var parseStyleText = cached(function (cssText) {
 
 /*  */
 
-function transformNode$2 (el, options) {
+function transformNode$1 (el, options) {
   var warn = options.warn || baseWarn;
   var staticStyle = getAndRemoveAttr(el, 'style');
   if (staticStyle) {
@@ -2219,7 +2195,7 @@ function transformNode$2 (el, options) {
   }
 }
 
-function genData$2 (el) {
+function genData$1 (el) {
   var data = '';
   if (el.staticStyle) {
     data += "staticStyle:" + (el.staticStyle) + ",";
@@ -2232,8 +2208,8 @@ function genData$2 (el) {
 
 var style = {
   staticKeys: ['staticStyle'],
-  transformNode: transformNode$2,
-  genData: genData$2
+  transformNode: transformNode$1,
+  genData: genData$1
 };
 
 /*  */
@@ -3403,6 +3379,36 @@ function cloneASTElement (el) {
 
 var model = {
   preTransformNode: preTransformNode
+};
+
+/*  */
+
+function transformNode$2(el) {
+  var list = el.attrsList;
+  for (var i = list.length - 1; i >= 0; i--) {
+    var name = list[i].name;
+    if (name.indexOf(':change:') === 0 || name.indexOf('v-bind:change:') === 0) {
+      var nameArr = name.split(':');
+      var wxsProp = nameArr[nameArr.length - 1];
+      var wxsPropBinding = el.attrsMap[':' + wxsProp] || el.attrsMap['v-bind:' + wxsProp];
+      if (wxsPropBinding) {
+        (el.wxsPropBindings || (el.wxsPropBindings = {}))['change:' + wxsProp] = wxsPropBinding;
+      }
+    }
+  }
+}
+
+function genData$2(el) {
+  var data = '';
+  if (el.wxsPropBindings) {
+    data += "wxsProps:" + (JSON.stringify(el.wxsPropBindings)) + ",";
+  }
+  return data
+}
+
+var wxs = {
+  transformNode: transformNode$2,
+  genData: genData$2
 };
 
 var modules = [
