@@ -193,7 +193,7 @@ export function genFor (
   const alias = el.alias
   const iterator1 = el.iterator1 ? `,${el.iterator1}` : ''
   const iterator2 = el.iterator2 ? `,${el.iterator2}` : ''
-
+  const iterator3 = el.iterator3 ? `,${el.iterator3}` : '' // fixed by xxxxxx
   if (process.env.NODE_ENV !== 'production' &&
     state.maybeComponent(el) &&
     el.tag !== 'slot' &&
@@ -211,7 +211,7 @@ export function genFor (
 
   el.forProcessed = true // avoid recursion
   return `${altHelper || '_l'}((${exp}),` +
-    `function(${alias}${iterator1}${iterator2}){` +
+    `function(${alias}${iterator1}${iterator2}${iterator3}){` + // fixed by xxxxxx
       `return ${(altGen || genElement)(el, state)}` +
     '})'
 }

@@ -1,3 +1,5 @@
+//src/compiler/codegen/index.js iterator3
+
 //src/sfc/parser.js customBlocks
 
 scripts/config.js SharedObject

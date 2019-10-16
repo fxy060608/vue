@@ -4476,7 +4476,7 @@
     var alias = el.alias;
     var iterator1 = el.iterator1 ? ("," + (el.iterator1)) : '';
     var iterator2 = el.iterator2 ? ("," + (el.iterator2)) : '';
-
+    var iterator3 = el.iterator3 ? ("," + (el.iterator3)) : ''; // fixed by xxxxxx
     if (state.maybeComponent(el) &&
       el.tag !== 'slot' &&
       el.tag !== 'template' &&
@@ -4493,7 +4493,7 @@
 
     el.forProcessed = true; // avoid recursion
     return (altHelper || '_l') + "((" + exp + ")," +
-      "function(" + alias + iterator1 + iterator2 + "){" +
+      "function(" + alias + iterator1 + iterator2 + iterator3 + "){" + // fixed by xxxxxx
         "return " + ((altGen || genElement)(el, state)) +
       '})'
   }
