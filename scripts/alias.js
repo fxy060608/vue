@@ -10,5 +10,6 @@ module.exports = {
   web: resolve('src/platforms/web'),
   weex: resolve('src/platforms/weex'),
   server: resolve('src/server'),
-  sfc: resolve('src/sfc')
+  sfc: resolve('src/sfc'),
+  app: resolve('src/platforms/app'),// fixed by xxxxxx
 }

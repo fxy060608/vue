@@ -206,8 +206,13 @@ export function mountComponent (
   // manually mounted instance, call mounted on self
   // mounted is called for render-created child components in its inserted hook
   if (vm.$vnode == null) {
+    // fixed by xxxxxx
     vm._isMounted = true
-    callHook(vm, 'mounted')
+    if (vm._$vd) {// 延迟 mounted 事件
+      vm._$vd.addMountedVm(vm)
+    } else {
+      callHook(vm, 'mounted')
+    }
   }
   return vm
 }

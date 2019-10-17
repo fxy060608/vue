@@ -133,7 +133,12 @@ function callUpdatedHooks (queue) {
     const watcher = queue[i]
     const vm = watcher.vm
     if (vm._watcher === watcher && vm._isMounted && !vm._isDestroyed) {
-      callHook(vm, 'updated')
+      // fixed by xxxxx
+      if (vm._$vd) { // 延迟 updated 事件
+        vm._$vd.addUpdatedVm(vm)
+      }else{
+        callHook(vm, 'updated')
+      }
     }
   }
 }

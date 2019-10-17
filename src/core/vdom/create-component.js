@@ -67,8 +67,13 @@ const componentVNodeHooks = {
   insert (vnode: MountedComponentVNode) {
     const { context, componentInstance } = vnode
     if (!componentInstance._isMounted) {
+      // fixed by xxxxxx
       componentInstance._isMounted = true
-      callHook(componentInstance, 'mounted')
+      if (componentInstance._$vd) {// 延迟 mounted
+        componentInstance._$vd.addMountedVm(componentInstance)
+      } else {
+        callHook(componentInstance, 'mounted')
+      }
     }
     if (vnode.data.keepAlive) {
       if (context._isMounted) {
