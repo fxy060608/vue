@@ -5,6 +5,20 @@ import { cached, camelize, extend, isDef, isUndef, hyphenate } from 'shared/util
 
 const cssVarRE = /^--/
 const importantRE = /\s*!important$/
+
+// upx,rpx 正则匹配
+const unitRE = /([+-]?\d+(\.\d+)?)[r|u]px/g
+
+const transformUnit = (val) => {
+  if (typeof val === 'string') {
+    return val.replace(unitRE, (a, b) => {
+      /* eslint-disable no-undef */
+      return uni.upx2px(b) + 'px'
+    })
+  }
+  return val
+}
+
 const setProp = (el, name, val) => {
   /* istanbul ignore if */
   if (cssVarRE.test(name)) {
@@ -18,10 +32,10 @@ const setProp = (el, name, val) => {
       // {display: ["-webkit-box", "-ms-flexbox", "flex"]}
       // Set them one by one, and the browser will only set those it can recognize
       for (let i = 0, len = val.length; i < len; i++) {
-        el.style[normalizedName] = val[i]
+        el.style[normalizedName] = transformUnit(val[i])
       }
     } else {
-      el.style[normalizedName] = val
+      el.style[normalizedName] = transformUnit(val)
     }
   }
 }
@@ -47,15 +61,16 @@ const normalize = cached(function (prop) {
 function updateStyle (oldVnode: VNodeWithData, vnode: VNodeWithData) {
   const data = vnode.data
   const oldData = oldVnode.data
-
+  const el: any = vnode.elm
   if (isUndef(data.staticStyle) && isUndef(data.style) &&
-    isUndef(oldData.staticStyle) && isUndef(oldData.style)
+    isUndef(oldData.staticStyle) && isUndef(oldData.style) &&
+    isUndef(el.__wxsStyle) // fixed by xxxxxx __wxsStyle
   ) {
     return
   }
 
   let cur, name
-  const el: any = vnode.elm
+  
   const oldStaticStyle: any = oldData.staticStyle
   const oldStyleBinding: any = oldData.normalizedStyle || oldData.style || {}
 
@@ -72,6 +87,12 @@ function updateStyle (oldVnode: VNodeWithData, vnode: VNodeWithData) {
     : style
 
   const newStyle = getStyle(vnode, true)
+
+  // fixed by xxxxxx __wxsStyle
+  if(el.__wxsStyle){
+    Object.assign(vnode.data.normalizedStyle, el.__wxsStyle)
+    Object.assign(newStyle, el.__wxsStyle)
+  }
 
   for (name in oldStyle) {
     if (isUndef(newStyle[name])) {

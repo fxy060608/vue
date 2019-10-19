@@ -210,6 +210,14 @@ const builds = {
     dest: resolve('packages/weex-template-compiler/build.js'),
     format: 'cjs',
     external: Object.keys(require('../packages/weex-template-compiler/package.json').dependencies)
+  },
+  // Runtime only ES modules build (for bundlers)
+  'app-runtime-esm': {
+    entry: resolve('app/entry-runtime.js'),
+    // dest: '/Users/fxy/Documents/HBuilderProjects/test-uni-app-v3/js/app-service-vue.runtime.esm.js',
+    dest: resolve('dist/view.runtime.esm.js'),
+    format: 'esm',
+    banner
   }
 }
 
