@@ -1,3 +1,11 @@
+import {
+  stringifyClass
+} from 'web/util/class'
+
+import {
+  normalizeStyleBinding
+} from 'web/util/style'
+
 import callHook from './call-hook'
 
 export default {
@@ -8,5 +16,8 @@ export default {
     }
 
     Vue.prototype.__call_hook = callHook
+    // 运行时需要格式化 class,style
+    Vue.prototype._$stringifyClass = stringifyClass
+    Vue.prototype._$normalizeStyleBinding = normalizeStyleBinding
   }
 }

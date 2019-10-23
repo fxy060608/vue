@@ -4430,7 +4430,7 @@
             if (el.parent && !maybeComponent(el.parent)) {
               warn$1(
                 "<template v-slot> can only appear at the root level inside " +
-                "the receiving the component",
+                "the receiving component",
                 el
               );
             }
@@ -5380,7 +5380,7 @@
     var alias = el.alias;
     var iterator1 = el.iterator1 ? ("," + (el.iterator1)) : '';
     var iterator2 = el.iterator2 ? ("," + (el.iterator2)) : '';
-
+    var iterator3 = el.iterator3 ? ("," + (el.iterator3)) : ''; // fixed by xxxxxx
     if (state.maybeComponent(el) &&
       el.tag !== 'slot' &&
       el.tag !== 'template' &&
@@ -5397,7 +5397,7 @@
 
     el.forProcessed = true; // avoid recursion
     return (altHelper || '_l') + "((" + exp + ")," +
-      "function(" + alias + iterator1 + iterator2 + "){" +
+      "function(" + alias + iterator1 + iterator2 + iterator3 + "){" + // fixed by xxxxxx
         "return " + ((altGen || genElement)(el, state)) +
       '})'
   }
@@ -7204,20 +7204,21 @@
     if (Array.isArray(val) || typeof val === 'string') {
       ret = new Array(val.length);
       for (i = 0, l = val.length; i < l; i++) {
-        ret[i] = render(val[i], i);
+        ret[i] = render(val[i], i, i, i);
       }
     } else if (typeof val === 'number') {
       ret = new Array(val);
       for (i = 0; i < val; i++) {
-        ret[i] = render(i + 1, i);
+        ret[i] = render(i + 1, i, i, i);
       }
     } else if (isObject(val)) {
       if (hasSymbol && val[Symbol.iterator]) {
         ret = [];
         var iterator = val[Symbol.iterator]();
         var result = iterator.next();
+        i = 0;
         while (!result.done) {
-          ret.push(render(result.value, ret.length));
+          ret.push(render(result.value, ret.length, i++, i));
           result = iterator.next();
         }
       } else {
@@ -7225,7 +7226,7 @@
         ret = new Array(keys.length);
         for (i = 0, l = keys.length; i < l; i++) {
           key = keys[i];
-          ret[i] = render(val[key], key, i);
+          ret[i] = render(val[key], key, i, i);
         }
       }
     }
@@ -8286,8 +8287,13 @@
       var context = vnode.context;
       var componentInstance = vnode.componentInstance;
       if (!componentInstance._isMounted) {
+        // fixed by xxxxxx
         componentInstance._isMounted = true;
-        callHook(componentInstance, 'mounted');
+        if (componentInstance._$vd) {// 延迟 mounted
+          componentInstance._$vd.addMountedVm(componentInstance);
+        } else {
+          callHook(componentInstance, 'mounted');
+        }
       }
       if (vnode.data.keepAlive) {
         if (context._isMounted) {

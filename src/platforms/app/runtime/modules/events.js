@@ -59,7 +59,14 @@ function updateDOMListeners (oldVnode: VNodeWithData, vnode: VNodeWithData) {
   const on = vnode.data.on || {}
   const oldOn = oldVnode.data.on || {}
   target = vnode.elm
-  target._$vd = vnode.context._$vd // fixed by xxxxxx 存储 vd
+  
+  // fixed by xxxxxx 存储 vd
+  target._$vd = vnode.context._$vd
+  const context = vnode.context
+  // 存储事件标记
+  target.setAttribute('nid', String(vnode.data.attrs['_i']))
+  target.setAttribute('cid', context._$id)
+
   normalizeEvents(on)
   updateListeners(on, oldOn, add, remove, createOnceHandler, vnode.context)
   target = undefined

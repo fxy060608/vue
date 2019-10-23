@@ -3,30 +3,56 @@ const noop = {}
 class UniElement {
   constructor(tagName) {
     this.tagName = tagName
-    this.attrs = Object.create(null)
+    this.cid = ''
+    this.nid = ''
+
+    this.events = Object.create(null)
   }
+
   setAttribute(key, value) {
-    this.attrs[key] = value
+    if (key === 'cid') {
+      this.cid = value
+    } else if (key === 'nid') {
+      this.nid = value
+    }
   }
+
+  dispatchEvent(name, target) {
+    const handlers = this.events[name]
+    if (!handlers) {
+      console.error(`cid=${this.cid},nid=${this.nid} dispatchEvent(${name}) not found`)
+    }
+    handlers.forEach(handler => {
+      handler(target)
+    })
+  }
+
   addEventListener(name, handler) {
-    const {
-      cid,
-      nid
-    } = this.attrs
-    if (!cid || !nid) {
-      return console.error(`cid=${cid},nid=${nid} addEventListener(${name}) not found`)
+    if (this.cid === '' || this.nid === '') {
+      return console.error(`cid=${this.cid},nid=${this.nid} addEventListener(${name}) not found`)
     }
-    this._$vd.addEvent(cid, nid, name, handler)
+    (this.events[name] || (this.events[name] = [])).push(handler)
+    this._$vd.addElement(this)
   }
+
   removeEventListener(name, handler) {
-    const {
-      cid,
-      nid
-    } = this.attrs
-    if (!cid || !nid) {
-      return console.error(`cid=${cid},nid=${nid} removeEventListener(${name}) not found`)
+    if (this.cid === '' || this.nid === '') {
+      return console.error(`cid=${this.cid},nid=${this.nid} removeEventListener(${name}) not found`)
     }
-    this._$vd.removeEvent(cid, nid, name, handler)
+    let isRemoved = false
+    if (this.events[name]) {
+      const handlerIndex = this.events[name].indexOf(handler)
+      if (handlerIndex !== -1) {
+        this.events[name].splice(handlerIndex, 1)
+        isRemoved = true
+      }
+    }
+    if (!isRemoved) {
+      console.error(`cid=${this.cid},nid=${this.nid} removeEventListener(${name}) handler not found`)
+    }
+
+    Object.keys(this.events).every(eventType => this.events[eventType].length === 0) &&
+      this._$vd.removeElement(this)
   }
 }
 

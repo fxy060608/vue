@@ -1960,7 +1960,7 @@ if (typeof Promise !== 'undefined' && isNative(Promise)) {
   isUsingMicroTask = true;
 } else if (typeof setImmediate !== 'undefined' && isNative(setImmediate)) {
   // Fallback to setImmediate.
-  // Techinically it leverages the (macro) task queue,
+  // Technically it leverages the (macro) task queue,
   // but it is still a better choice than setTimeout.
   timerFunc = function () {
     setImmediate(flushCallbacks);
@@ -2627,20 +2627,21 @@ function renderList (
   if (Array.isArray(val) || typeof val === 'string') {
     ret = new Array(val.length);
     for (i = 0, l = val.length; i < l; i++) {
-      ret[i] = render(val[i], i);
+      ret[i] = render(val[i], i, i, i);
     }
   } else if (typeof val === 'number') {
     ret = new Array(val);
     for (i = 0; i < val; i++) {
-      ret[i] = render(i + 1, i);
+      ret[i] = render(i + 1, i, i, i);
     }
   } else if (isObject(val)) {
     if (hasSymbol && val[Symbol.iterator]) {
       ret = [];
       var iterator = val[Symbol.iterator]();
       var result = iterator.next();
+      i = 0;
       while (!result.done) {
-        ret.push(render(result.value, ret.length));
+        ret.push(render(result.value, ret.length, i++, i));
         result = iterator.next();
       }
     } else {
@@ -2648,7 +2649,7 @@ function renderList (
       ret = new Array(keys.length);
       for (i = 0, l = keys.length; i < l; i++) {
         key = keys[i];
-        ret[i] = render(val[key], key, i);
+        ret[i] = render(val[key], key, i, i);
       }
     }
   }
@@ -3135,8 +3136,13 @@ var componentVNodeHooks = {
     var context = vnode.context;
     var componentInstance = vnode.componentInstance;
     if (!componentInstance._isMounted) {
+      // fixed by xxxxxx
       componentInstance._isMounted = true;
-      callHook(componentInstance, 'mounted');
+      if (componentInstance._$vd) {// 延迟 mounted
+        componentInstance._$vd.addMountedVm(componentInstance);
+      } else {
+        callHook(componentInstance, 'mounted');
+      }
     }
     if (vnode.data.keepAlive) {
       if (context._isMounted) {
@@ -4082,8 +4088,13 @@ function mountComponent (
   // manually mounted instance, call mounted on self
   // mounted is called for render-created child components in its inserted hook
   if (vm.$vnode == null) {
+    // fixed by xxxxxx
     vm._isMounted = true;
-    callHook(vm, 'mounted');
+    if (vm._$vd) {// 延迟 mounted 事件
+      vm._$vd.addMountedVm(vm);
+    } else {
+      callHook(vm, 'mounted');
+    }
   }
   return vm
 }
@@ -4348,7 +4359,12 @@ function callUpdatedHooks (queue) {
     var watcher = queue[i];
     var vm = watcher.vm;
     if (vm._watcher === watcher && vm._isMounted && !vm._isDestroyed) {
-      callHook(vm, 'updated');
+      // fixed by xxxxx
+      if (vm._$vd) { // 延迟 updated 事件
+        vm._$vd.addUpdatedVm(vm);
+      }else{
+        callHook(vm, 'updated');
+      }
     }
   }
 }
