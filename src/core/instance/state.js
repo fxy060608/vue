@@ -245,7 +245,7 @@ function createComputedGetter (key) {
       if (watcher.dirty) {
         watcher.evaluate()
       }
-      if (Dep.target) {
+      if (Dep.SharedObject.target) { // fixed by xxxxxx
         watcher.depend()
       }
       return watcher.value

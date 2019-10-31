@@ -6,14 +6,16 @@ import {
   normalizeStyleBinding
 } from 'web/util/style'
 
+import {
+    queue
+} from 'core/observer/scheduler'
+
 import callHook from './call-hook'
 
 export default {
   install(Vue) {
 
-    Vue.prototype._m = function renderStatic() {
-      return this._e()
-    }
+    Vue.prototype._$queue = queue
 
     Vue.prototype.__call_hook = callHook
     // 运行时需要格式化 class,style
