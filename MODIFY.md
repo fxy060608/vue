@@ -7,11 +7,14 @@ src/core/instance/state.js Dep.SharedObject.target
 src/core/observer/dep.js Dep.SharedObject.target
 src/core/observer/index.js Dep.SharedObject.target
 
+//app-plus
+src/core/instance/render-helpers/render-list.js
 
 //h5
 src/platforms/web/runtime/index.js  __call_hook
 src/platforms/web/runtime/modules/class __wxsClass
 src/platforms/web/runtime/modules/style __wxsStyle
+
 
 
 package.json
