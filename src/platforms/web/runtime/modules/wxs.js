@@ -4,6 +4,10 @@ import {
   isUndef
 } from 'shared/util'
 
+import {
+  observe
+} from 'core/observer/index'
+
 function findWxsProps(wxsProps, attrs) {
   const ret = {}
   Object.keys(wxsProps).forEach(name => {
@@ -39,7 +43,13 @@ function updateWxsProps(oldVnode: VNodeWithData, vnode: VNodeWithData) {
   vnode.$wxsWatches = {}
 
   Object.keys(wxsProps).forEach(prop => {
-    vnode.$wxsWatches[prop] = oldWxsWatches[prop] || vnode.context.$watch(prop, function(newVal, oldVal) {
+    // app-plus view wxs
+    let watchProp = prop
+    if (vnode.context.wxsProps) {
+      watchProp = 'wxsProps.' + prop
+    }
+
+    vnode.$wxsWatches[prop] = oldWxsWatches[prop] || vnode.context.$watch(watchProp, function(newVal, oldVal) {
       wxsProps[prop](
         newVal,
         oldVal,
