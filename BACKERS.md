@@ -188,11 +188,6 @@ Funds donated via Patreon go directly to support Evan You's full-time work on Vu
         </a>
       </td>
       <td align="center" valign="middle">
-        <a href="https://blokt.com/" target="_blank">
-          <img width="148px" src="https://raw.githubusercontent.com/vuejs/vuejs.org/master/themes/vue/source/images/blokt_cryptocurrency_news.png">
-        </a>
-      </td>
-      <td align="center" valign="middle">
         <a href="https://www.y8.com/" target="_blank">
           <img width="148px" src="https://raw.githubusercontent.com/vuejs/vuejs.org/master/themes/vue/source/images/y8.png">
         </a>
@@ -207,13 +202,13 @@ Funds donated via Patreon go directly to support Evan You's full-time work on Vu
           <img width="148px" src="https://raw.githubusercontent.com/vuejs/vuejs.org/master/themes/vue/source/images/fastcoding_inc.svg">
         </a>
       </td>
-    </tr><tr></tr>
-    <tr>
       <td align="center" valign="middle">
         <a href="https://usave.co.uk/utilities/broadband" target="_blank">
           <img width="148px" src="https://raw.githubusercontent.com/vuejs/vuejs.org/master/themes/vue/source/images/usave.png">
         </a>
       </td>
+    </tr><tr></tr>
+    <tr>
       <td align="center" valign="middle">
         <a href="https://www.dailynow.co/" target="_blank">
           <img width="148px" src="https://raw.githubusercontent.com/vuejs/vuejs.org/master/themes/vue/source/images/daily.png">
@@ -235,15 +230,20 @@ Funds donated via Patreon go directly to support Evan You's full-time work on Vu
         </a>
       </td>
       <td align="center" valign="middle">
-        <a href="https://piratebay.ink" target="_blank">
-          <img width="148px" src="https://raw.githubusercontent.com/vuejs/vuejs.org/master/themes/vue/source/images/piratebay_proxy.png">
+        <a href="https://thepiratebayproxylist.se" target="_blank">
+          <img width="148px" src="https://raw.githubusercontent.com/vuejs/vuejs.org/master/themes/vue/source/images/piratebayproxy.png">
+        </a>
+      </td>
+      <td align="center" valign="middle">
+        <a href="https://www.programmers.io" target="_blank">
+          <img width="148px" src="https://raw.githubusercontent.com/vuejs/vuejs.org/master/themes/vue/source/images/programmers_io.png">
         </a>
       </td>
     </tr><tr></tr>
     <tr>
       <td align="center" valign="middle">
-        <a href="https://www.programmers.io" target="_blank">
-          <img width="148px" src="https://raw.githubusercontent.com/vuejs/vuejs.org/master/themes/vue/source/images/programmers_io.png">
+        <a href="https://watchcartoononline.best/" target="_blank">
+          <img width="148px" src="https://raw.githubusercontent.com/vuejs/vuejs.org/master/themes/vue/source/images/watchcartoononline.png">
         </a>
       </td>
     </tr><tr></tr>
@@ -374,6 +374,7 @@ Funds donated via Patreon go directly to support Evan You's full-time work on Vu
 - Sean Ferguson
 - Johnny Ray Austin
 - Daniel
+- Manuel Guzman
 <!--50 end-->
 
 <h2 align="center">Backers via Patreon</h2>
@@ -382,9 +383,9 @@ Funds donated via Patreon go directly to support Evan You's full-time work on Vu
 - Masahiro Tanaka
 - Shawn Wildermuth
 - Sean Washington
+- Lars Andreas Ness
 - Benjamin Listwon
 - Keisuke Kita
-- Lars Andreas Ness
 - Kirk Lewis
 - Victor Tolbert
 - Wen-Tien Chang
@@ -396,74 +397,75 @@ Funds donated via Patreon go directly to support Evan You's full-time work on Vu
 - Matsumoto Takamasa
 - Matt Jones
 - Niannian Modisette
-- Duncan Kenzie
 - Guy Gavergun
 - Bernhard E. Reiter
 - Zoran Knezevic
-- Jon Hobbs-Smith
 - Pierre Vanhulst
-- Asaf Yishai
-- Haim Yulzari
+- Jon Hobbs-Smith
 - Akiho Nagao
+- Haim Yulzari
 - Anthony Estebe
+- Asaf Yishai
 - Jim Raden
 - Jeremy Tan
 - IMGNRY
 - Tyler
-- Guilherme S L de Souza
 - Mickaël Andrieu
 - Vivekanandhan Natarajan
-- Rob Yedlin
+- Guilherme S L de Souza
 - Joe Gregory
 - Jordan Oroshiba
 - Marcos Moura
 - Jessie Hernandez
-- Eric
-- Ivan Sieder
-- Romain Lienard
 - username
+- Ivan Sieder
+- Eric
+- Romain Lienard
 - Bohdan Kokotko
-- Wakana Seki
-- Alexander Weiher
+- Christo Crampton
 - David Ang
 - Donald Fischer
-- Oskar Lindgren
 - Jere Sjöroos
-- Domenico Gaudioso
+- Wakana Seki
+- Alexander Weiher
+- Philip John Basile
+- Oskar Lindgren
 - Jaeyoung Lee
 - David Kaplan
+- Domenico Gaudioso
 - Andy
 - Matt Sencenbaugh
 - Juan Bermudez
-- Hannes Kochniß
-- Elon Hung
-- Daniel Mattingley
 - Chris Calo
+- Elon Hung
+- Hannes Kochniß
 - Soichiro Isshiki
-- Ed Linklater
 - Garion Herman
+- Ed Linklater
 - Andrew Willis
-- Princeyesuraj Edward
 - Yusuke Kawabata
-- 龙腾道
-- Nick Dandakis
+- Princeyesuraj Edward
 - Peter Matkovsky
+- Nick Dandakis
+- 龙腾道
 - Fabien GuySake Ungerer
-- Kenneth Crawford
 - Nathan Mallison
+- Kenneth Crawford
 - Bill Condo
 - Pierre Lebrun
-- John Thompson
 - Ryan Brewer
 - Martin Bastien
 - Alfonso Herrera
 - Bichinger Software & Consulting
-- Abhay
-- Nicolaas
 - Riki Fridrich
+- Nicolaas
 - Afif Sohaili
+- darkbluewalrus
 - Diana Bergholz
 - Tomasz Kleszczewski
+- Allan McKernan
+- Parham
+- 琚致远
 <!--10 end-->
 
 <h2 align="center">Backers via OpenCollective</h2>
