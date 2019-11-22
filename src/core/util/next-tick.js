@@ -39,7 +39,7 @@ let timerFunc
 // completely stops working after triggering a few times... so, if native
 // Promise is available, we will use it:
 /* istanbul ignore next, $flow-disable-line */
-if (typeof Promise !== 'undefined' && isNative(Promise)) {
+if (typeof Promise !== 'undefined' && isNative(Promise) && !isIOS) { // fixed by xxxxxx
   const p = Promise.resolve()
   timerFunc = () => {
     p.then(flushCallbacks)

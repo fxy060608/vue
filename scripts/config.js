@@ -217,7 +217,14 @@ const builds = {
     // dest: '/Users/fxy/Documents/HBuilderProjects/test-uni-app-v3/js/app-service-vue.runtime.esm.js',
     dest: resolve('dist/service.runtime.esm.js'),
     format: 'esm',
-    banner
+    plugins: [{
+      intro () {
+        return 'export default function vueFactory (exports, SharedObject) {'
+      },
+      outro () {
+        return '}'
+      }
+    }]
   }
 }
 
