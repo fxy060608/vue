@@ -70,6 +70,8 @@ const componentVNodeHooks = {
       // fixed by xxxxxx
       componentInstance._isMounted = true
       if (componentInstance._$vd) {// 延迟 mounted
+        callHook(componentInstance, 'onServiceCreated')
+        callHook(componentInstance, 'onServiceAttached')
         componentInstance._$vd.addMountedVm(componentInstance)
       } else {
         callHook(componentInstance, 'mounted')
@@ -161,7 +163,7 @@ export function createComponent (
   }
 
   // extract props
-  const propsData = extractPropsFromVNodeData(data, Ctor, tag)
+  const propsData = extractPropsFromVNodeData(data, Ctor, tag, context)
 
   // functional component
   if (isTrue(Ctor.options.functional)) {

@@ -209,6 +209,8 @@ export function mountComponent (
     // fixed by xxxxxx
     vm._isMounted = true
     if (vm._$vd) {// 延迟 mounted 事件
+      callHook(vm, 'onServiceCreated')
+      callHook(vm, 'onServiceAttached')
       vm._$vd.addMountedVm(vm)
     } else {
       callHook(vm, 'mounted')
@@ -279,6 +281,9 @@ export function updateChildComponent (
     // keep a copy of raw propsData
     vm.$options.propsData = propsData
   }
+
+  // fixed by xxxxxx update properties(mp runtime)
+  vm._$updateProperties && vm._$updateProperties(vm)
 
   // update listeners
   listeners = listeners || emptyObject
