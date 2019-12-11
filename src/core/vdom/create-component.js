@@ -163,7 +163,7 @@ export function createComponent (
   }
 
   // extract props
-  const propsData = extractPropsFromVNodeData(data, Ctor, tag, context)
+  const propsData = extractPropsFromVNodeData(data, Ctor, tag, context) // fixed by xxxxxx
 
   // functional component
   if (isTrue(Ctor.options.functional)) {
