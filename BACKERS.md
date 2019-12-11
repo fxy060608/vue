@@ -240,13 +240,6 @@ Funds donated via Patreon go directly to support Evan You's full-time work on Vu
         </a>
       </td>
     </tr><tr></tr>
-    <tr>
-      <td align="center" valign="middle">
-        <a href="https://watchcartoononline.best/" target="_blank">
-          <img width="148px" src="https://raw.githubusercontent.com/vuejs/vuejs.org/master/themes/vue/source/images/watchcartoononline.png">
-        </a>
-      </td>
-    </tr><tr></tr>
   </tbody>
 </table>
 <!--gold end-->
@@ -273,11 +266,6 @@ Funds donated via Patreon go directly to support Evan You's full-time work on Vu
 <table>
   <tbody>
     <tr>
-      <td align="center" valign="middle">
-        <a href="https://dopamine.bg/" target="_blank">
-          <img width="148px" src="https://raw.githubusercontent.com/vuejs/vuejs.org/master/themes/vue/source/images/dopamine.png">
-        </a>
-      </td>
       <td align="center" valign="middle">
         <a href="https://roadster.com" target="_blank">
           <img width="148px" src="https://raw.githubusercontent.com/vuejs/vuejs.org/master/themes/vue/source/images/roadster.png">
@@ -313,16 +301,6 @@ Funds donated via Patreon go directly to support Evan You's full-time work on Vu
       <td align="center" valign="middle">
         <a href="https://www.earthlink.ro" target="_blank">
           <img width="148px" src="https://raw.githubusercontent.com/vuejs/vuejs.org/master/themes/vue/source/images/earthlink.png">
-        </a>
-      </td>
-      <td align="center" valign="middle">
-        <a href="https://twitter.com/philipjbasile" target="_blank">
-          <img width="148px" src="https://raw.githubusercontent.com/vuejs/vuejs.org/master/themes/vue/source/images/philip_john_basile.gif">
-        </a>
-      </td>
-      <td align="center" valign="middle">
-        <a href="https://writersperhour.com/" target="_blank">
-          <img width="148px" src="https://raw.githubusercontent.com/vuejs/vuejs.org/master/themes/vue/source/images/writers_per_hour.jpg">
         </a>
       </td>
     </tr><tr></tr>
@@ -368,7 +346,6 @@ Funds donated via Patreon go directly to support Evan You's full-time work on Vu
 <!--50 start-->
 - Wasim Khamlichi
 - errorrik
-- Alex Balashov
 - Konstantin Levinski
 - Blaise Laflamme
 - Sean Ferguson
@@ -383,75 +360,71 @@ Funds donated via Patreon go directly to support Evan You's full-time work on Vu
 - Masahiro Tanaka
 - Shawn Wildermuth
 - Sean Washington
+- Keisuke Kita
 - Lars Andreas Ness
 - Benjamin Listwon
-- Keisuke Kita
 - Kirk Lewis
 - Victor Tolbert
 - Wen-Tien Chang
 - Stephen Michael Hartley
-- Phan An
 - Luiz
-- James J. Ye
 - Barbara Liau
+- James J. Ye
 - Matsumoto Takamasa
-- Matt Jones
-- Niannian Modisette
 - Guy Gavergun
+- Niannian Modisette
+- Matt Jones
 - Bernhard E. Reiter
 - Zoran Knezevic
-- Pierre Vanhulst
 - Jon Hobbs-Smith
-- Akiho Nagao
-- Haim Yulzari
+- Pierre Vanhulst
 - Anthony Estebe
 - Asaf Yishai
+- Haim Yulzari
+- Akiho Nagao
 - Jim Raden
 - Jeremy Tan
 - IMGNRY
 - Tyler
-- Mickaël Andrieu
-- Vivekanandhan Natarajan
 - Guilherme S L de Souza
-- Joe Gregory
+- Vivekanandhan Natarajan
+- Mickaël Andrieu
+- username
 - Jordan Oroshiba
+- Joe Gregory
 - Marcos Moura
 - Jessie Hernandez
-- username
-- Ivan Sieder
 - Eric
-- Romain Lienard
-- Bohdan Kokotko
 - Christo Crampton
-- David Ang
-- Donald Fischer
+- Bohdan Kokotko
+- Romain Lienard
+- Oskar Lindgren
 - Jere Sjöroos
+- David Ang
 - Wakana Seki
 - Alexander Weiher
-- Philip John Basile
-- Oskar Lindgren
+- Donald Fischer
 - Jaeyoung Lee
 - David Kaplan
-- Domenico Gaudioso
 - Andy
 - Matt Sencenbaugh
 - Juan Bermudez
-- Chris Calo
-- Elon Hung
 - Hannes Kochniß
+- Daniel Mattingley
+- Elon Hung
+- Chris Calo
 - Soichiro Isshiki
-- Garion Herman
 - Ed Linklater
-- Andrew Willis
+- Garion Herman
 - Yusuke Kawabata
 - Princeyesuraj Edward
-- Peter Matkovsky
 - Nick Dandakis
 - 龙腾道
+- Peter Matkovsky
 - Fabien GuySake Ungerer
-- Nathan Mallison
 - Kenneth Crawford
 - Bill Condo
+- Nathan Mallison
 - Pierre Lebrun
 - Ryan Brewer
 - Martin Bastien
@@ -460,12 +433,14 @@ Funds donated via Patreon go directly to support Evan You's full-time work on Vu
 - Riki Fridrich
 - Nicolaas
 - Afif Sohaili
-- darkbluewalrus
-- Diana Bergholz
 - Tomasz Kleszczewski
-- Allan McKernan
+- Diana Bergholz
+- darkbluewalrus
 - Parham
+- Allan McKernan
 - 琚致远
+- Roy Segall
+- Ronni Lin
 <!--10 end-->
 
 <h2 align="center">Backers via OpenCollective</h2>
