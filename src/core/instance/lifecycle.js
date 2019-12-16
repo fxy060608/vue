@@ -206,6 +206,9 @@ export function mountComponent (
   // manually mounted instance, call mounted on self
   // mounted is called for render-created child components in its inserted hook
   if (vm.$vnode == null) {
+    // fixed by xxxxxx
+    callHook(vm, 'onServiceCreated')
+    callHook(vm, 'onServiceAttached')
     vm._isMounted = true
     callHook(vm, 'mounted')
   }
@@ -274,7 +277,10 @@ export function updateChildComponent (
     // keep a copy of raw propsData
     vm.$options.propsData = propsData
   }
-
+  
+  // fixed by xxxxxx update properties(mp runtime)
+  vm._$updateProperties && vm._$updateProperties(vm)
+  
   // update listeners
   listeners = listeners || emptyObject
   const oldListeners = vm.$options._parentListeners

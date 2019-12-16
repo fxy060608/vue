@@ -5,21 +5,55 @@ import {
   hasOwn,
   isDef,
   isUndef,
+  camelize, // fixed by xxxxxx
   hyphenate,
   formatComponentName
 } from 'core/util/index'
 
+// fixed by xxxxxx (mp properties)
+function extractPropertiesFromVNodeData(data, Ctor, res, context) {
+  const propOptions = Ctor.options.mpOptions && Ctor.options.mpOptions.properties
+  if (isUndef(propOptions)) {
+    return res
+  }
+  const externalClasses = Ctor.options.mpOptions.externalClasses || []
+  const {
+    attrs,
+    props
+  } = data
+  if (isDef(attrs) || isDef(props)) {
+    for (const key in propOptions) {
+      const altKey = hyphenate(key)
+      const result = checkProp(res, props, key, altKey, true) ||
+          checkProp(res, attrs, key, altKey, false)
+      // externalClass
+      if (
+        result &&
+        res[key] &&
+        externalClasses.indexOf(altKey) !== -1 &&
+        context[camelize(res[key])]
+      ) {
+        // 赋值 externalClass 真正的值(模板里 externalClass 的值可能是字符串)
+        res[key] = context[camelize(res[key])]
+      }
+    }
+  }
+  return res
+}
+
 export function extractPropsFromVNodeData (
   data: VNodeData,
   Ctor: Class<Component>,
-  tag?: string
+  tag?: string,
+  context?: Component,// fixed by xxxxxx
 ): ?Object {
   // we are only extracting raw values here.
   // validation and default values are handled in the child
   // component itself.
   const propOptions = Ctor.options.props
   if (isUndef(propOptions)) {
-    return
+    // fixed by xxxxxx
+    return extractPropertiesFromVNodeData(data, Ctor, {}, context)
   }
   const res = {}
   const { attrs, props } = data
@@ -46,7 +80,8 @@ export function extractPropsFromVNodeData (
       checkProp(res, attrs, key, altKey, false)
     }
   }
-  return res
+  // fixed by xxxxxx
+  return extractPropertiesFromVNodeData(data, Ctor, res, context)
 }
 
 function checkProp (

@@ -67,6 +67,8 @@ const componentVNodeHooks = {
   insert (vnode: MountedComponentVNode) {
     const { context, componentInstance } = vnode
     if (!componentInstance._isMounted) {
+      callHook(componentInstance, 'onServiceCreated')
+      callHook(componentInstance, 'onServiceAttached')
       componentInstance._isMounted = true
       callHook(componentInstance, 'mounted')
     }
@@ -156,7 +158,7 @@ export function createComponent (
   }
 
   // extract props
-  const propsData = extractPropsFromVNodeData(data, Ctor, tag)
+  const propsData = extractPropsFromVNodeData(data, Ctor, tag, context) // fixed by xxxxxx
 
   // functional component
   if (isTrue(Ctor.options.functional)) {

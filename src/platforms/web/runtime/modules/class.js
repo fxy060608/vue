@@ -2,7 +2,8 @@
 
 import {
   isDef,
-  isUndef
+  isUndef,
+  camelize
 } from 'shared/util'
 
 import {
@@ -59,7 +60,17 @@ function updateClass (oldVnode: any, vnode: any) {
     })
     cls = Object.keys(clsObj).join(' ')
   }
-
+  // fixed by xxxxxx (仅 h5 平台 extenalClasses)
+  const context = vnode.context
+  const externalClasses = context.$options.mpOptions &&
+    context.$options.mpOptions.externalClasses
+  if (Array.isArray(externalClasses)) {
+    externalClasses.forEach(externalClass => {
+      // 简单替换 externalClass
+      const externalClassValue = context[camelize(externalClass)]
+      externalClassValue && (cls = cls.replace(externalClass, externalClassValue))
+    })
+  }
   // set the class
   if (cls !== el._prevClass) {
     el.setAttribute('class', cls)
