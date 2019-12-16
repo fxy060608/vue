@@ -76,10 +76,6 @@ Vue.component('union-prop', {
     complexUnion: { type: [User, Number] as PropType<User | number> },
     kittyUser: Object as PropType<ICat & IUser>,
     callback: Function as PropType<ConfirmCallback>,
-    mixed: [RegExp, Array],
-    object: [Cat, User],
-    primitive: [String, Number],
-    regex: RegExp,
     union: [User, Number] as PropType<User | number>
   },
   data() {
@@ -87,16 +83,27 @@ Vue.component('union-prop', {
     this.complexUnion;
     this.kittyUser;
     this.callback(true);
-    this.mixed;
-    this.object;
-    this.primitive;
-    this.regex.compile;
     this.union;
     return {
       fixedSize: this.union,
     }
   }
 });
+
+Vue.component('union-prop-with-no-casting', {
+  props: {
+    mixed: [RegExp, Array],
+    object: [Cat, User],
+    primitive: [String, Number],
+    regex: RegExp
+  },
+  data() {
+    this.mixed;
+    this.object;
+    this.primitive;
+    this.regex.compile;
+  }
+})
 
 Vue.component('prop-with-primitive-default', {
   props: {
@@ -105,7 +112,7 @@ Vue.component('prop-with-primitive-default', {
       default: () => String(Math.round(Math.random() * 10000000))
     }
   },
-  created() {
+  created(): void {
     this.id;
   }
 });
@@ -144,7 +151,7 @@ Vue.component('component', {
     }
   },
   methods: {
-    plus() {
+    plus(): void {
       this.a++;
       this.aDouble.toFixed();
       this.aPlus = 1;

@@ -2,7 +2,7 @@
 
 
 
-module.exports = function weexFactory (exports, document, SharedObject) {
+module.exports = function weexFactory (exports, document) {
 
 /*  */
 
@@ -709,8 +709,8 @@ Dep.prototype.removeSub = function removeSub (sub) {
 };
 
 Dep.prototype.depend = function depend () {
-  if (Dep.SharedObject.target) {
-    Dep.SharedObject.target.addDep(this);
+  if (Dep.target) {
+    Dep.target.addDep(this);
   }
 };
 
@@ -731,20 +731,17 @@ Dep.prototype.notify = function notify () {
 // The current target watcher being evaluated.
 // This is globally unique because only one watcher
 // can be evaluated at a time.
-// fixed by xxxxxx (nvue shared vuex)
-/* eslint-disable no-undef */
-Dep.SharedObject = typeof SharedObject !== 'undefined' ? SharedObject : {};
-Dep.SharedObject.target = null;
-Dep.SharedObject.targetStack = [];
+Dep.target = null;
+var targetStack = [];
 
 function pushTarget (target) {
-  Dep.SharedObject.targetStack.push(target);
-  Dep.SharedObject.target = target;
+  targetStack.push(target);
+  Dep.target = target;
 }
 
 function popTarget () {
-  Dep.SharedObject.targetStack.pop();
-  Dep.SharedObject.target = Dep.SharedObject.targetStack[Dep.SharedObject.targetStack.length - 1];
+  targetStack.pop();
+  Dep.target = targetStack[targetStack.length - 1];
 }
 
 /*  */
@@ -911,9 +908,7 @@ var Observer = function Observer (value) {
   def(value, '__ob__', this);
   if (Array.isArray(value)) {
     if (hasProto) {
-      {
-        protoAugment(value, arrayMethods);
-      }
+      protoAugment(value, arrayMethods);
     } else {
       copyAugment(value, arrayMethods, arrayKeys);
     }
@@ -1025,7 +1020,7 @@ function defineReactive$$1 (
     configurable: true,
     get: function reactiveGetter () {
       var value = getter ? getter.call(obj) : val;
-      if (Dep.SharedObject.target) { // fixed by xxxxxx
+      if (Dep.target) {
         dep.depend();
         if (childOb) {
           childOb.dep.depend();
@@ -1958,7 +1953,7 @@ if (typeof Promise !== 'undefined' && isNative(Promise)) {
   };
 } else if (typeof setImmediate !== 'undefined' && isNative(setImmediate)) {
   // Fallback to setImmediate.
-  // Techinically it leverages the (macro) task queue,
+  // Technically it leverages the (macro) task queue,
   // but it is still a better choice than setTimeout.
   timerFunc = function () {
     setImmediate(flushCallbacks);
@@ -2024,7 +2019,7 @@ if (process.env.NODE_ENV !== 'production') {
     warn(
       "Property \"" + key + "\" must be accessed with \"$data." + key + "\" because " +
       'properties starting with "$" or "_" are not proxied in the Vue instance to ' +
-      'prevent conflicts with Vue internals' +
+      'prevent conflicts with Vue internals. ' +
       'See: https://vuejs.org/v2/api/#data',
       target
     );
@@ -2520,12 +2515,7 @@ function resolveSlots (
         slot.push(child);
       }
     } else {
-      // fixed by xxxxxx 临时 hack 掉 uni-app 中的异步 name slot page
-      if(child.asyncMeta && child.asyncMeta.data && child.asyncMeta.data.slot === 'page'){
-        (slots['page'] || (slots['page'] = [])).push(child);
-      }else{
-        (slots.default || (slots.default = [])).push(child);
-      }
+      (slots.default || (slots.default = [])).push(child);
     }
   }
   // ignore slots that contains only whitespace
@@ -2919,7 +2909,7 @@ function bindDynamicKeys (baseObj, values) {
     if (typeof key === 'string' && key) {
       baseObj[values[i]] = values[i + 1];
     } else if (process.env.NODE_ENV !== 'production' && key !== '' && key !== null) {
-      // null is a speical value for explicitly removing a binding
+      // null is a special value for explicitly removing a binding
       warn(
         ("Invalid value for dynamic directive argument (expected string or null): " + key),
         this
@@ -3609,6 +3599,12 @@ function _createElement (
     ns = (context.$vnode && context.$vnode.ns) || config.getTagNamespace(tag);
     if (config.isReservedTag(tag)) {
       // platform built-in elements
+      if (process.env.NODE_ENV !== 'production' && isDef(data) && isDef(data.nativeOn)) {
+        warn(
+          ("The .native modifier for v-on is only valid on components but it was used on <" + tag + ">."),
+          context
+        );
+      }
       vnode = new VNode(
         config.parsePlatformTagName(tag), data, children,
         undefined, undefined, context
@@ -3737,7 +3733,7 @@ function renderMixin (Vue) {
     // render self
     var vnode;
     try {
-      // There's no need to maintain a stack becaues all render fns are called
+      // There's no need to maintain a stack because all render fns are called
       // separately from one another. Nested component's render fns are called
       // when parent component is patched.
       currentRenderingInstance = vm;
@@ -5031,7 +5027,7 @@ function createComputedGetter (key) {
       if (watcher.dirty) {
         watcher.evaluate();
       }
-      if (Dep.SharedObject.target) {// fixed by xxxxxx
+      if (Dep.target) {
         watcher.depend();
       }
       return watcher.value
@@ -5198,10 +5194,10 @@ function initMixin (Vue) {
     initEvents(vm);
     initRender(vm);
     callHook(vm, 'beforeCreate');
-    vm.mpHost !== 'mp-toutiao' && initInjections(vm); // resolve injections before data/props  
+    initInjections(vm); // resolve injections before data/props
     initState(vm);
-    vm.mpHost !== 'mp-toutiao' && initProvide(vm); // resolve provide after data/props
-    vm.mpHost !== 'mp-toutiao' && callHook(vm, 'created');      
+    initProvide(vm); // resolve provide after data/props
+    callHook(vm, 'created');
 
     /* istanbul ignore if */
     if (process.env.NODE_ENV !== 'production' && config.performance && mark) {
@@ -5677,18 +5673,18 @@ function createTextNode (text) {
 function createComment (text) {
   return document.createComment(text)
 }
-var TEXT_TAG_NAME = process.env.UNI_USING_WEEX ? 'text' : 'u-text';
+
 function insertBefore (
   node,
   target,
   before
 ) {
   if (target.nodeType === 3) {
-    if (node.type === TEXT_TAG_NAME) {
+    if (node.type === 'text') {
       node.setAttr('value', target.text);
       target.parentNode = node;
     } else {
-      var text = createElement$1(TEXT_TAG_NAME);
+      var text = createElement$1('text');
       text.setAttr('value', target.text);
       node.insertBefore(text, before);
     }
@@ -5707,11 +5703,11 @@ function removeChild (node, child) {
 
 function appendChild (node, child) {
   if (child.nodeType === 3) {
-    if (node.type === TEXT_TAG_NAME) {
+    if (node.type === 'text') {
       node.setAttr('value', child.text);
       child.parentNode = node;
     } else {
-      var text = createElement$1(TEXT_TAG_NAME);
+      var text = createElement$1('text');
       text.setAttr('value', child.text);
       node.appendChild(text);
     }
@@ -6172,7 +6168,7 @@ function createPatchFunction (backend) {
     }
   }
 
-  function removeVnodes (parentElm, vnodes, startIdx, endIdx) {
+  function removeVnodes (vnodes, startIdx, endIdx) {
     for (; startIdx <= endIdx; ++startIdx) {
       var ch = vnodes[startIdx];
       if (isDef(ch)) {
@@ -6283,7 +6279,7 @@ function createPatchFunction (backend) {
       refElm = isUndef(newCh[newEndIdx + 1]) ? null : newCh[newEndIdx + 1].elm;
       addVnodes(parentElm, refElm, newCh, newStartIdx, newEndIdx, insertedVnodeQueue);
     } else if (newStartIdx > newEndIdx) {
-      removeVnodes(parentElm, oldCh, oldStartIdx, oldEndIdx);
+      removeVnodes(oldCh, oldStartIdx, oldEndIdx);
     }
   }
 
@@ -6375,7 +6371,7 @@ function createPatchFunction (backend) {
         if (isDef(oldVnode.text)) { nodeOps.setTextContent(elm, ''); }
         addVnodes(elm, null, ch, 0, ch.length - 1, insertedVnodeQueue);
       } else if (isDef(oldCh)) {
-        removeVnodes(elm, oldCh, 0, oldCh.length - 1);
+        removeVnodes(oldCh, 0, oldCh.length - 1);
       } else if (isDef(oldVnode.text)) {
         nodeOps.setTextContent(elm, '');
       }
@@ -6606,7 +6602,7 @@ function createPatchFunction (backend) {
 
         // destroy old node
         if (isDef(parentElm)) {
-          removeVnodes(parentElm, [oldVnode], 0, 0);
+          removeVnodes([oldVnode], 0, 0);
         } else if (isDef(oldVnode.tag)) {
           invokeDestroyHook(oldVnode);
         }
@@ -6742,289 +6738,120 @@ var baseModules = [
 
 /*  */
 
-var parseStyleText = cached(function (cssText) {
-  var res = {};
-  var listDelimiter = /;(?![^(]*\))/g;
-  var propertyDelimiter = /:(.+)/;
-  cssText.split(listDelimiter).forEach(function (item) {
-    if (item) {
-      var tmp = item.split(propertyDelimiter);
-      tmp.length > 1 && (res[tmp[0].trim()] = tmp[1].trim());
-    }
-  });
-  return res
-});
-
-// merge static and dynamic style data on the same vnode
-function normalizeStyleData (data) {
-  var style = normalizeStyleBinding(data.style);
-  // static style is pre-processed into an object during compilation
-  // and is always a fresh object, so it's safe to merge into it
-  return data.staticStyle
-    ? extend(data.staticStyle, style)
-    : style
-}
-
-// normalize possible array / string values into Object
-function normalizeStyleBinding (bindingStyle) {
-  if (Array.isArray(bindingStyle)) {
-    return toObject(bindingStyle)
+function updateAttrs (oldVnode, vnode) {
+  if (!oldVnode.data.attrs && !vnode.data.attrs) {
+    return
   }
-  if (typeof bindingStyle === 'string') {
-    return parseStyleText(bindingStyle)
-  }
-  return bindingStyle
-}
-
-/**
- * parent component style should be after child's
- * so that parent component's style could override it
- */
-function getStyle (vnode, checkChild) {
-  var res = {};
-  var styleData;
-
-  if (checkChild) {
-    var childNode = vnode;
-    while (childNode.componentInstance) {
-      childNode = childNode.componentInstance._vnode;
-      if (
-        childNode && childNode.data &&
-        (styleData = normalizeStyleData(childNode.data))
-      ) {
-        extend(res, styleData);
-      }
-    }
+  var key, cur, old;
+  var elm = vnode.elm;
+  var oldAttrs = oldVnode.data.attrs || {};
+  var attrs = vnode.data.attrs || {};
+  // clone observed objects, as the user probably wants to mutate it
+  if (attrs.__ob__) {
+    attrs = vnode.data.attrs = extend({}, attrs);
   }
 
-  if ((styleData = normalizeStyleData(vnode.data))) {
-    extend(res, styleData);
-  }
-
-  var parentNode = vnode;
-  while ((parentNode = parentNode.parent)) {
-    if (parentNode.data && (styleData = normalizeStyleData(parentNode.data))) {
-      extend(res, styleData);
+  var supportBatchUpdate = typeof elm.setAttrs === 'function';
+  var batchedAttrs = {};
+  for (key in attrs) {
+    cur = attrs[key];
+    old = oldAttrs[key];
+    if (old !== cur) {
+      supportBatchUpdate
+        ? (batchedAttrs[key] = cur)
+        : elm.setAttr(key, cur);
     }
   }
-  return res
-}
-
-/*  */
-
-var TAGS = {
-    'view': {
-        'class': ['hoverClass'],
-        'style': []
-    },
-    'button': {
-        'class': ['hoverClass'],
-        'style': []
-    },
-    'navigator': {
-        'class': ['hoverClass'],
-        'style': []
-    },
-    'u-input': {
-        'class': ['placeholderClass'],
-        'style': ['placeholderStyle']
-    },
-    'u-textarea': {
-        'class': ['placeholderClass'],
-        'style': ['placeholderStyle']
-    },
-    'picker-view': {
-        'class': ['indicatorClass', 'maskClass'],
-        'style': ['indicatorStyle', 'maskStyle']
+  for (key in oldAttrs) {
+    if (attrs[key] == null) {
+      supportBatchUpdate
+        ? (batchedAttrs[key] = undefined)
+        : elm.setAttr(key);
     }
-};
-
-function normalizeAttr(key, val, el, ctx) {
-    if (!val) {
-        return val
-    }
-    var opts = TAGS[el.type];
-    if (opts) {
-        if (opts['class'].indexOf(key) !== -1) {
-            return ctx.$options.style && ctx.$options.style[val] || {}
-        }
-        if (opts['style'].indexOf(key) !== -1) {
-            return normalizeStyleBinding(val)
-        }
-    }
-    return val
-}
-
-function normalizeAttrs(attrs, el, ctx) {
-    var opts = TAGS[el.type];
-    if (!opts) {
-        return attrs
-    }
-    var stylesheet = ctx.$options.style || {};
-    Object.keys(attrs).forEach(function (key) {
-        var val = attrs[key];
-        if (opts['class'].indexOf(key) !== -1) {
-            attrs[key] = stylesheet[val] || {};
-        } else if (opts['style'].indexOf(key) !== -1) {
-            attrs[key] = normalizeStyleBinding(val);
-        }
-    });
-    return attrs
-}
-
-function updateAttrs(oldVnode, vnode) {
-    if (!oldVnode.data.attrs && !vnode.data.attrs) {
-        return
-    }
-    var key, cur, old;
-    var elm = vnode.elm;
-    var oldAttrs = oldVnode.data.attrs || {};
-    var attrs = vnode.data.attrs || {};
-    // clone observed objects, as the user probably wants to mutate it
-    if (attrs.__ob__) {
-        attrs = vnode.data.attrs = extend({}, attrs);
-    }
-
-    var supportBatchUpdate = typeof elm.setAttrs === 'function';
-    var batchedAttrs = {};
-    for (key in attrs) {
-        cur = attrs[key];
-        old = oldAttrs[key];
-        if (old !== cur) {
-            supportBatchUpdate
-                ?
-                (batchedAttrs[key] = cur) :
-                elm.setAttr(key, normalizeAttr(key, cur, elm, vnode.context));
-        }
-    }
-    for (key in oldAttrs) {
-        if (attrs[key] == null) {
-            supportBatchUpdate
-                ?
-                (batchedAttrs[key] = undefined) :
-                elm.setAttr(key);
-        }
-    }
-    if (supportBatchUpdate) {
-        elm.setAttrs(normalizeAttrs(batchedAttrs, elm, vnode.context));
-    }
+  }
+  if (supportBatchUpdate) {
+    elm.setAttrs(batchedAttrs);
+  }
 }
 
 var attrs = {
-    create: updateAttrs,
-    update: updateAttrs
+  create: updateAttrs,
+  update: updateAttrs
 };
 
 /*  */
 
-function genClassStyleForVnode(vnode) {
-    var style = getClassStyleForVnode(vnode);
-    var parentNode = vnode;
-    var childNode = vnode;
-    while (isDef(childNode.componentInstance)) {
-        childNode = childNode.componentInstance._vnode;
-        if (childNode && childNode.data) {
-            style = extend(getClassStyleForVnode(childNode), style);
-        }
+function updateClass (oldVnode, vnode) {
+  var el = vnode.elm;
+  var ctx = vnode.context;
+
+  var data = vnode.data;
+  var oldData = oldVnode.data;
+  if (!data.staticClass &&
+    !data.class &&
+    (!oldData || (!oldData.staticClass && !oldData.class))
+  ) {
+    return
+  }
+
+  var oldClassList = makeClassList(oldData);
+  var classList = makeClassList(data);
+
+  if (typeof el.setClassList === 'function') {
+    el.setClassList(classList);
+  } else {
+    var style = getStyle(oldClassList, classList, ctx);
+    if (typeof el.setStyles === 'function') {
+      el.setStyles(style);
+    } else {
+      for (var key in style) {
+        el.setStyle(key, style[key]);
+      }
     }
-    while (isDef(parentNode = parentNode.parent)) {
-        if (parentNode && parentNode.data) {
-            style = extend(style, getClassStyleForVnode(parentNode));
-        }
-    }
-    return style
+  }
 }
 
-function getClassStyleForVnode(vnode) {
-    var data = vnode.data;
-    if (
-        isUndef(data.staticClass) &&
-        isUndef(data.class)
-    ) {
-        return {}
-    }
-
-    return getStyle$1(makeClassList(data), vnode.context)
+function makeClassList (data) {
+  var classList = [];
+  // unlike web, weex vnode staticClass is an Array
+  var staticClass = data.staticClass;
+  var dataClass = data.class;
+  if (staticClass) {
+    classList.push.apply(classList, staticClass);
+  }
+  if (Array.isArray(dataClass)) {
+    classList.push.apply(classList, dataClass);
+  } else if (isObject(dataClass)) {
+    classList.push.apply(classList, Object.keys(dataClass).filter(function (className) { return dataClass[className]; }));
+  } else if (typeof dataClass === 'string') {
+    classList.push.apply(classList, dataClass.trim().split(/\s+/));
+  }
+  return classList
 }
 
-function getStyle$1(classList, ctx) {
-    var stylesheet = ctx.$options.style || {};
-    var result = {};
-    classList.forEach(function (name) {
-        var style = stylesheet[name];
-        extend(result, style);
-    });
-    return result
-}
-
-function makeClassList(data) {
-    var classList = [];
-    // unlike web, weex vnode staticClass is an Array
-    var staticClass = data.staticClass;
-    var dataClass = data.class;
-    if (staticClass) {
-        classList.push.apply(classList, staticClass);
+function getStyle (oldClassList, classList, ctx) {
+  // style is a weex-only injected object
+  // compiled from <style> tags in weex files
+  var stylesheet = ctx.$options.style || {};
+  var result = {};
+  classList.forEach(function (name) {
+    var style = stylesheet[name];
+    extend(result, style);
+  });
+  oldClassList.forEach(function (name) {
+    var style = stylesheet[name];
+    for (var key in style) {
+      if (!result.hasOwnProperty(key)) {
+        result[key] = '';
+      }
     }
-    if (Array.isArray(dataClass)) {
-        classList.push.apply(classList, dataClass);
-    } else if (isObject(dataClass)) {
-        classList.push.apply(classList, Object.keys(dataClass).filter(function (className) { return dataClass[className]; }));
-    } else if (typeof dataClass === 'string') {
-        classList.push.apply(classList, dataClass.trim().split(/\s+/));
-    }
-    return classList
-}
-
-function updateElemStyle(el, newStyle, oldStyle, normalize) {
-    var cur, name;
-    var batchedStyles = {};
-
-    for (name in oldStyle) {
-        if (isUndef(newStyle[name])) {
-            batchedStyles[normalize(name)] = '';
-        }
-    }
-    for (name in newStyle) {
-        cur = newStyle[name];
-        if (cur !== oldStyle[name]) {
-            batchedStyles[normalize(name)] = cur;
-        }
-    }
-    el.setStyles(batchedStyles);
-}
-
-/*  */
-
-function updateClass(oldVnode, vnode) {
-    var data = vnode.data;
-    var oldData = oldVnode.data;
-    if (
-        isUndef(data.staticClass) &&
-        isUndef(data.class) && (
-            isUndef(oldData) || (
-                isUndef(oldData.staticClass) &&
-                isUndef(oldData.class)
-            )
-        )
-    ) {
-        return
-    }
-
-    updateElemStyle(
-        vnode.elm,
-        genClassStyleForVnode(vnode),
-        genClassStyleForVnode(oldVnode),
-        normalize
-    );
-}
-
-function normalize(name) { //class 已在编译阶段处理
-    return name
+  });
+  return result
 }
 
 var klass = {
-    create: updateClass,
-    update: updateClass
+  create: updateClass,
+  update: updateClass
 };
 
 /*  */
@@ -7082,44 +6909,84 @@ var events = {
 
 /*  */
 
-var normalize$1 = cached(camelize);
+var normalize = cached(camelize);
 
-function updateStyle (oldVnode, vnode) {
-  var data = vnode.data;
-  var oldData = oldVnode.data;
-
-  if (isUndef(data.staticStyle) && isUndef(data.style) &&
-    isUndef(oldData.staticStyle) && isUndef(oldData.style)
-  ) {
+function createStyle (oldVnode, vnode) {
+  if (!vnode.data.staticStyle) {
+    updateStyle(oldVnode, vnode);
     return
   }
+  var elm = vnode.elm;
+  var staticStyle = vnode.data.staticStyle;
+  var supportBatchUpdate = typeof elm.setStyles === 'function';
+  var batchedStyles = {};
+  for (var name in staticStyle) {
+    if (staticStyle[name]) {
+      supportBatchUpdate
+        ? (batchedStyles[normalize(name)] = staticStyle[name])
+        : elm.setStyle(normalize(name), staticStyle[name]);
+    }
+  }
+  if (supportBatchUpdate) {
+    elm.setStyles(batchedStyles);
+  }
+  updateStyle(oldVnode, vnode);
+}
 
-  var el = vnode.elm;
-  var oldStaticStyle = oldData.staticStyle;
-  var oldStyleBinding = oldData.normalizedStyle || oldData.style || {};
+function updateStyle (oldVnode, vnode) {
+  if (!oldVnode.data.style && !vnode.data.style) {
+    return
+  }
+  var cur, name;
+  var elm = vnode.elm;
+  var oldStyle = oldVnode.data.style || {};
+  var style = vnode.data.style || {};
 
-  // if static style exists, stylebinding already merged into it when doing normalizeStyleData
-  var oldStyle = oldStaticStyle || oldStyleBinding;
+  var needClone = style.__ob__;
 
-  var style = normalizeStyleBinding(vnode.data.style) || {};
+  // handle array syntax
+  if (Array.isArray(style)) {
+    style = vnode.data.style = toObject$1(style);
+  }
 
-  // store normalized style under a different key for next diff
-  // make sure to clone it if it's reactive, since the user likely wants
-  // to mutate it.
-  vnode.data.normalizedStyle = isDef(style.__ob__)
-    ? extend({}, style)
-    : style;
+  // clone the style for future updates,
+  // in case the user mutates the style object in-place.
+  if (needClone) {
+    style = vnode.data.style = extend({}, style);
+  }
 
-  updateElemStyle(
-      el, 
-      getStyle(vnode, true), 
-      oldStyle,
-      normalize$1
-  );
+  var supportBatchUpdate = typeof elm.setStyles === 'function';
+  var batchedStyles = {};
+  for (name in oldStyle) {
+    if (!style[name]) {
+      supportBatchUpdate
+        ? (batchedStyles[normalize(name)] = '')
+        : elm.setStyle(normalize(name), '');
+    }
+  }
+  for (name in style) {
+    cur = style[name];
+    supportBatchUpdate
+      ? (batchedStyles[normalize(name)] = cur)
+      : elm.setStyle(normalize(name), cur);
+  }
+  if (supportBatchUpdate) {
+    elm.setStyles(batchedStyles);
+  }
+}
+
+function toObject$1 (arr) {
+  var res = {};
+  for (var i = 0; i < arr.length; i++) {
+    if (arr[i]) {
+      extend(res, arr[i]);
+    }
+  }
+  return res
 }
 
 var style = {
-  create: updateStyle,
+  create: createStyle,
   update: updateStyle
 };
 
@@ -7456,6 +7323,91 @@ var patch = createPatchFunction({
 });
 
 var platformDirectives = {
+};
+
+/*  */
+
+function getVNodeType (vnode) {
+  if (!vnode.tag) {
+    return ''
+  }
+  return vnode.tag.replace(/vue\-component\-(\d+\-)?/, '')
+}
+
+function isSimpleSpan (vnode) {
+  return vnode.children &&
+    vnode.children.length === 1 &&
+    !vnode.children[0].tag
+}
+
+function parseStyle (vnode) {
+  if (!vnode || !vnode.data) {
+    return
+  }
+  var ref = vnode.data;
+  var staticStyle = ref.staticStyle;
+  var staticClass = ref.staticClass;
+  if (vnode.data.style || vnode.data.class || staticStyle || staticClass) {
+    var styles = Object.assign({}, staticStyle, vnode.data.style);
+    var cssMap = vnode.context.$options.style || {};
+    var classList = [].concat(staticClass, vnode.data.class);
+    classList.forEach(function (name) {
+      if (name && cssMap[name]) {
+        Object.assign(styles, cssMap[name]);
+      }
+    });
+    return styles
+  }
+}
+
+function convertVNodeChildren (children) {
+  if (!children.length) {
+    return
+  }
+
+  return children.map(function (vnode) {
+    var type = getVNodeType(vnode);
+    var props = { type: type };
+
+    // convert raw text node
+    if (!type) {
+      props.type = 'span';
+      props.attr = {
+        value: (vnode.text || '').trim()
+      };
+    } else {
+      props.style = parseStyle(vnode);
+      if (vnode.data) {
+        props.attr = vnode.data.attrs;
+        if (vnode.data.on) {
+          props.events = vnode.data.on;
+        }
+      }
+      if (type === 'span' && isSimpleSpan(vnode)) {
+        props.attr = props.attr || {};
+        props.attr.value = vnode.children[0].text.trim();
+        return props
+      }
+    }
+
+    if (vnode.children && vnode.children.length) {
+      props.children = convertVNodeChildren(vnode.children);
+    }
+
+    return props
+  })
+}
+
+var Richtext = {
+  name: 'richtext',
+  render: function render (h) {
+    return h('weex:richtext', {
+      on: this._events,
+      attrs: {
+        value: convertVNodeChildren(this.$options._renderChildren || [])
+      }
+    })
+  }
 };
 
 /*  */
@@ -7797,6 +7749,7 @@ var TransitionGroup = {
 // }
 
 var platformComponents = {
+  Richtext: Richtext,
   Transition: Transition,
   TransitionGroup: TransitionGroup
 };
@@ -7805,7 +7758,7 @@ var platformComponents = {
 
 var isReservedTag$1 = makeMap(
   'template,script,style,element,content,slot,link,meta,svg,view,' +
-  'a,div,img,image,text,span,input,textarea,spinner,select,' +
+  'a,div,img,image,text,span,input,switch,textarea,spinner,select,' +
   'slider,slider-neighbor,indicator,canvas,' +
   'list,cell,header,loading,loading-indicator,refresh,scrollable,scroller,' +
   'video,web,embed,tabbar,tabheader,datepicker,timepicker,marquee,countdown',
@@ -7846,25 +7799,6 @@ function query (el, document) {
   return placeholder
 }
 
-function callHook$2(hook, args) {
-    var vm = this;
-    // #7573 disable dep collection when invoking lifecycle hooks
-    pushTarget();
-    var handlers = vm.$options[hook];
-    var info = hook + " hook";
-    var ret;
-    if (handlers) {
-        for (var i = 0, j = handlers.length; i < j; i++) {
-            ret = invokeWithErrorHandling(handlers[i], vm, args ? [args] : null, vm, info);
-        }
-    }
-    if (vm._hasHookEvent) {
-        vm.$emit('hook:' + hook);
-    }
-    popTarget();
-    return ret
-}
-
 /*  */
 
 // install platform specific utils
@@ -7891,8 +7825,6 @@ Vue.prototype.$mount = function (
     hydrating
   )
 };
-// add callHook
-Vue.prototype.__call_hook = callHook$2;
 
 // this entry is built and wrapped with a factory function
 

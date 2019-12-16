@@ -4,7 +4,6 @@ Object.defineProperty(exports, '__esModule', { value: true });
 
 function _interopDefault (ex) { return (ex && (typeof ex === 'object') && 'default' in ex) ? ex['default'] : ex; }
 
-var deindent = _interopDefault(require('de-indent'));
 var he = _interopDefault(require('he'));
 
 /*  */
@@ -267,7 +266,7 @@ var startTagOpen = new RegExp(("^<" + qnameCapture));
 var startTagClose = /^\s*(\/?)>/;
 var endTag = new RegExp(("^<\\/" + qnameCapture + "[^>]*>"));
 var doctype = /^<!DOCTYPE [^>]+>/i;
-// #7298: escape - to avoid being pased as HTML comment when inlined in page
+// #7298: escape - to avoid being passed as HTML comment when inlined in page
 var comment = /^<!\--/;
 var conditionalComment = /^<!\[/;
 
@@ -548,144 +547,6 @@ function parseHTML (html, options) {
       }
     }
   }
-}
-
-/*  */
-
-var splitRE = /\r?\n/g;
-var replaceRE = /./g;
-var isSpecialTag = makeMap('script,style,template', true);
-var isCustomBlock = makeMap('wxs,filter,sjs', true);// fixed by xxxxxx
-
-/**
- * Parse a single-file component (*.vue) file into an SFC Descriptor Object.
- */
-function parseComponent (
-  content,
-  options
-) {
-  if ( options === void 0 ) options = {};
-
-  var sfc = {
-    template: null,
-    script: null,
-    styles: [],
-    customBlocks: [],
-    errors: []
-  };
-  var depth = 0;
-  var currentBlock = null;
-
-  var warn = function (msg) {
-    sfc.errors.push(msg);
-  };
-
-  if (process.env.NODE_ENV !== 'production' && options.outputSourceRange) {
-    warn = function (msg, range) {
-      var data = { msg: msg };
-      if (range.start != null) {
-        data.start = range.start;
-      }
-      if (range.end != null) {
-        data.end = range.end;
-      }
-      sfc.errors.push(data);
-    };
-  }
-
-  function start (
-    tag,
-    attrs,
-    unary,
-    start,
-    end
-  ) {
-    if (depth === 0) {
-      currentBlock = {
-        type: tag,
-        content: '',
-        start: end,
-        attrs: attrs.reduce(function (cumulated, ref) {
-          var name = ref.name;
-          var value = ref.value;
-
-          cumulated[name] = value || true;
-          return cumulated
-        }, {})
-      };// fixed by xxxxxx
-      if (isSpecialTag(tag) && !isCustomBlock(String(currentBlock.attrs.lang || ''))) {
-        checkAttrs(currentBlock, attrs);
-        if (tag === 'style') {
-          sfc.styles.push(currentBlock);
-        } else {
-          sfc[tag] = currentBlock;
-        }
-      } else { // custom blocks
-        sfc.customBlocks.push(currentBlock);
-      }
-    }
-    if (!unary) {
-      depth++;
-    }
-  }
-
-  function checkAttrs (block, attrs) {
-    for (var i = 0; i < attrs.length; i++) {
-      var attr = attrs[i];
-      if (attr.name === 'lang') {
-        block.lang = attr.value;
-      }
-      if (attr.name === 'scoped') {
-        block.scoped = true;
-      }
-      if (attr.name === 'module') {
-        block.module = attr.value || true;
-      }
-      if (attr.name === 'src') {
-        block.src = attr.value;
-      }
-    }
-  }
-
-  function end (tag, start) {
-    if (depth === 1 && currentBlock) {
-      currentBlock.end = start;
-      var text = content.slice(currentBlock.start, currentBlock.end);
-      if (options.deindent !== false) {
-        text = deindent(text);
-      }
-      // pad content so that linters and pre-processors can output correct
-      // line numbers in errors and warnings
-      if (currentBlock.type !== 'template' && options.pad) {
-        text = padContent(currentBlock, options.pad) + text;
-      }
-      currentBlock.content = text;
-      currentBlock = null;
-    }
-    depth--;
-  }
-
-  function padContent (block, pad) {
-    if (pad === 'space') {
-      return content.slice(0, block.start).replace(replaceRE, ' ')
-    } else {
-      var offset = content.slice(0, block.start).split(splitRE).length;
-      var lang = block.attrs && block.attrs.lang; // fixed by xxxxxx
-      var padChar = block.type === 'script' && !block.lang && !isCustomBlock(String(lang || ''))
-        ? '//\n'
-        : '\n';
-      return Array(offset).join(padChar)
-    }
-  }
-
-  parseHTML(content, {
-    warn: warn,
-    start: start,
-    end: end,
-    outputSourceRange: options.outputSourceRange
-  });
-
-  return sfc
 }
 
 /*  */
@@ -1300,7 +1161,7 @@ function rangeSetItem (
 /*  */
 
 var onRE = /^@|^v-on:/;
-var dirRE = /^v-|^@|^:/;
+var dirRE = /^v-|^@|^:|^#/;
 var forAliasRE = /([\s\S]*?)\s+(?:in|of)\s+([\s\S]*)/;
 var forIteratorRE = /,([^,\}\]]*)(?:,([^,\}\]]*))?$/;
 var stripParensRE = /^\(|\)$/g;
@@ -1486,18 +1347,6 @@ function parse (
     shouldKeepComment: options.comments,
     outputSourceRange: options.outputSourceRange,
     start: function start (tag, attrs, unary, start$1, end) {
-
-    {
-      attrs.forEach(function (attr) {
-        if(
-          attr.value === '' &&
-          (attr.start + attr.name.length) === attr.end
-        ){
-          attr.value = true;
-        }
-      });
-    }
-
       // check namespace.
       // inherit parent ns if there is one
       var ns = (currentParent && currentParent.ns) || platformGetTagNamespace(tag);
@@ -1936,7 +1785,7 @@ function processSlotContent (el) {
           if (el.parent && !maybeComponent(el.parent)) {
             warn(
               "<template v-slot> can only appear at the root level inside " +
-              "the receiving the component",
+              "the receiving component",
               el
             );
           }
@@ -2386,7 +2235,7 @@ function isDirectChildOfTemplateFor (node) {
 
 /*  */
 
-var fnExpRE = /^([\w$_]+|\([^)]*?\))\s*=>|^function\s*(?:[\w$]+)?\s*\(/;
+var fnExpRE = /^([\w$_]+|\([^)]*?\))\s*=>|^function(?:\s+[\w$]+)?\s*\(/;
 var fnInvokeRE = /\([^)]*?\);*$/;
 var simplePathRE = /^[A-Za-z_$][\w$]*(?:\.[A-Za-z_$][\w$]*|\['[^']*?']|\["[^"]*?"]|\[\d+]|\[[A-Za-z_$][\w$]*])*$/;
 
@@ -2806,8 +2655,8 @@ Dep.prototype.removeSub = function removeSub (sub) {
 };
 
 Dep.prototype.depend = function depend () {
-  if (Dep.SharedObject.target) {
-    Dep.SharedObject.target.addDep(this);
+  if (Dep.target) {
+    Dep.target.addDep(this);
   }
 };
 
@@ -2828,11 +2677,7 @@ Dep.prototype.notify = function notify () {
 // The current target watcher being evaluated.
 // This is globally unique because only one watcher
 // can be evaluated at a time.
-// fixed by xxxxxx (nvue shared vuex)
-/* eslint-disable no-undef */
-Dep.SharedObject = typeof SharedObject !== 'undefined' ? SharedObject : {};
-Dep.SharedObject.target = null;
-Dep.SharedObject.targetStack = [];
+Dep.target = null;
 
 /*  */
 
@@ -2951,9 +2796,7 @@ var Observer = function Observer (value) {
   def(value, '__ob__', this);
   if (Array.isArray(value)) {
     if (hasProto) {
-      {
-        protoAugment(value, arrayMethods);
-      }
+      protoAugment(value, arrayMethods);
     } else {
       copyAugment(value, arrayMethods, arrayKeys);
     }
@@ -3065,7 +2908,7 @@ function defineReactive$$1 (
     configurable: true,
     get: function reactiveGetter () {
       var value = getter ? getter.call(obj) : val;
-      if (Dep.SharedObject.target) { // fixed by xxxxxx
+      if (Dep.target) {
         dep.depend();
         if (childOb) {
           childOb.dep.depend();
@@ -4068,6 +3911,8 @@ function checkNode (node, warn$$1) {
           var range = node.rawAttrsMap[name];
           if (name === 'v-for') {
             checkFor(node, ("v-for=\"" + value + "\""), warn$$1, range);
+          } else if (name === 'v-slot' || name[0] === '#') {
+            checkFunctionParameterExpression(value, (name + "=\"" + value + "\""), warn$$1, range);
           } else if (onRE.test(name)) {
             checkEvent(value, (name + "=\"" + value + "\""), warn$$1, range);
           } else {
@@ -4087,9 +3932,9 @@ function checkNode (node, warn$$1) {
 }
 
 function checkEvent (exp, text, warn$$1, range) {
-  var stipped = exp.replace(stripStringRE, '');
-  var keywordMatch = stipped.match(unaryOperatorsRE);
-  if (keywordMatch && stipped.charAt(keywordMatch.index - 1) !== '$') {
+  var stripped = exp.replace(stripStringRE, '');
+  var keywordMatch = stripped.match(unaryOperatorsRE);
+  if (keywordMatch && stripped.charAt(keywordMatch.index - 1) !== '$') {
     warn$$1(
       "avoid using JavaScript unary operator as property name: " +
       "\"" + (keywordMatch[0]) + "\" in expression " + (text.trim()),
@@ -4141,6 +3986,19 @@ function checkExpression (exp, text, warn$$1, range) {
         range
       );
     }
+  }
+}
+
+function checkFunctionParameterExpression (exp, text, warn$$1, range) {
+  try {
+    new Function(exp, '');
+  } catch (e) {
+    warn$$1(
+      "invalid function parameter expression: " + (e.message) + " in\n\n" +
+      "    " + exp + "\n\n" +
+      "  Raw expression: " + (text.trim()) + "\n",
+      range
+    );
   }
 }
 
@@ -4989,12 +4847,7 @@ function model (
   el,
   dir
 ) {
-  if (
-    el.tag === 'input' ||
-    el.tag === 'textarea' ||
-    el.tag === 'u-input' ||
-    el.tag === 'u-textarea'
-  ) {
+  if (el.tag === 'input' || el.tag === 'textarea') {
     genDefaultModel(el, dir.value, dir.modifiers);
   } else {
     genComponentModel(el, dir.value, dir.modifiers);
@@ -5013,9 +4866,6 @@ function genDefaultModel (
   var event = lazy ? 'change' : 'input';
 
   var valueExpression = "$event.target.attr.value" + (trim ? '.trim()' : '');
-  if(process.env.UNI_USING_NVUE_COMPILER){
-    valueExpression = "$event.detail.value" + (trim ? '.trim()' : '');
-  }
   if (number) {
     valueExpression = "_n(" + valueExpression + ")";
   }
@@ -5033,7 +4883,7 @@ var directives = {
 
 var isReservedTag = makeMap(
   'template,script,style,element,content,slot,link,meta,svg,view,' +
-  'a,div,img,image,text,span,input,textarea,spinner,select,' +
+  'a,div,img,image,text,span,input,switch,textarea,spinner,select,' +
   'slider,slider-neighbor,indicator,canvas,' +
   'list,cell,header,loading,loading-indicator,refresh,scrollable,scroller,' +
   'video,web,embed,tabbar,tabheader,datepicker,timepicker,marquee,countdown',
@@ -5104,6 +4954,5 @@ function compile (
   return result
 }
 
-exports.parseComponent = parseComponent;
 exports.compile = compile;
 exports.generateCodeFrame = generateCodeFrame;
