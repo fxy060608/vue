@@ -4,10 +4,6 @@ import {
   isUndef
 } from 'shared/util'
 
-import {
-  observe
-} from 'core/observer/index'
-
 function findWxsProps(wxsProps, attrs) {
   const ret = {}
   Object.keys(wxsProps).forEach(name => {
