@@ -7,7 +7,7 @@ import { makeMap } from 'shared/util'
 const splitRE = /\r?\n/g
 const replaceRE = /./g
 const isSpecialTag = makeMap('script,style,template', true)
-const isCustomBlock = makeMap('wxs,filter,sjs', true)// fixed by xxxxxx
+const isCustomBlock = makeMap('wxs,filter,sjs,renderjs', true)// fixed by xxxxxx
 
 /**
  * Parse a single-file component (*.vue) file into an SFC Descriptor Object.
