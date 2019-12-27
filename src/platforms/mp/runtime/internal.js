@@ -71,9 +71,18 @@ export function internalMixin(Vue: Class<Component>) {
 
   MP_METHODS.forEach(method => {
     Vue.prototype[method] = function(args) {
-      if (this.$scope) {
+      if (this.$scope && this.$scope[method]) {
         return this.$scope[method](args)
       }
+      // 主要是 mp-alipay
+      if (method === 'createSelectorQuery') {
+        /* eslint-disable no-undef */
+        return uni.createSelectorQuery(args).in(this)
+      } else if (method === 'createIntersectionObserver') {
+        /* eslint-disable no-undef */
+        return uni.createIntersectionObserver(this, args)
+      }
+      // TODO mp-alipay 暂不支持 selectAllComponents,selectComponent
     }
   })
 
