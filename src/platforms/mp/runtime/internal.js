@@ -51,7 +51,13 @@ function getTarget(obj, path) {
 export function internalMixin(Vue: Class<Component>) {
 
   Vue.config.errorHandler = function(err) {
-    console.error(err)
+    /* eslint-disable no-undef */
+    const app = getApp()
+    if (app && app.onError) {
+      app.onError(err)
+    } else {
+      console.error(err)
+    }
   }
 
   const oldEmit = Vue.prototype.$emit
@@ -75,7 +81,7 @@ export function internalMixin(Vue: Class<Component>) {
         return this.$scope[method](args)
       }
       // mp-alipay
-      if(typeof my === 'undefined'){
+      if (typeof my === 'undefined') {
         return
       }
       if (method === 'createSelectorQuery') {
