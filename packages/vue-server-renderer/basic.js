@@ -4772,7 +4772,7 @@
         return
       }
 
-      if(process.env.UNI_PLATFORM !== 'h5'){ // fixed by xxxxxx  非 h5 平台 type 不会是 checkbox,radio
+      if (process.env.UNI_PLATFORM !== 'h5') { // fixed by xxxxxx  非 h5 平台 type 不会是 checkbox,radio
         return
       }
 
@@ -4906,8 +4906,8 @@
         );
       }
     }
-
-    if (el.component) {
+    // fixed by xxxxxx (app-plus service)
+    if (el.component || (tag === 'v-uni-input' || tag === 'v-uni-textarea')) {
       genComponentModel(el, value, modifiers);
       // component v-model doesn't need extra runtime
       return false

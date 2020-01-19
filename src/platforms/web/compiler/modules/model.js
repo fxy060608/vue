@@ -30,7 +30,7 @@ function preTransformNode (el: ASTElement, options: CompilerOptions) {
       return
     }
 
-    if(process.env.UNI_PLATFORM !== 'h5'){ // fixed by xxxxxx  非 h5 平台 type 不会是 checkbox,radio
+    if (process.env.UNI_PLATFORM !== 'h5') { // fixed by xxxxxx  非 h5 平台 type 不会是 checkbox,radio
       return
     }
 
