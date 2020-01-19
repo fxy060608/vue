@@ -33,8 +33,8 @@ export default function model (
       )
     }
   }
-  // fixed by xxxxxx (app-plus service)
-  if (el.component || (tag === 'v-uni-input' || tag === 'v-uni-textarea')) {
+  
+  if (el.component) {
     genComponentModel(el, value, modifiers)
     // component v-model doesn't need extra runtime
     return false
