@@ -76,8 +76,10 @@ export function insertBefore() {
 
 }
 
-export function removeChild() {
-
+export function removeChild(node, child) {
+  if (child && child._$vd) {
+    child._$vd.removeElement(child)
+  }
 }
 
 export function appendChild() {
