@@ -212,11 +212,27 @@ const builds = {
     external: Object.keys(require('../packages/weex-template-compiler/package.json').dependencies)
   },
   // Runtime only ES modules build (for bundlers)
-  'app-runtime-esm': {
+  'app-runtime-esm-dev': {
     entry: resolve('app/entry-runtime.js'),
     // dest: '/Users/fxy/Documents/HBuilderProjects/test-uni-app-v3/js/app-service-vue.runtime.esm.js',
-    dest: resolve('dist/service.runtime.esm.js'),
+    dest: resolve('dist/service.runtime.esm.dev.js'),
     format: 'esm',
+    env: 'development',
+    plugins: [{
+      intro () {
+        return 'export default function vueFactory (exports, SharedObject) {'
+      },
+      outro () {
+        return '}'
+      }
+    }]
+  },
+  'app-runtime-esm-prod': {
+    entry: resolve('app/entry-runtime.js'),
+    // dest: '/Users/fxy/Documents/HBuilderProjects/test-uni-app-v3/js/app-service-vue.runtime.esm.js',
+    dest: resolve('dist/service.runtime.esm.prod.js'),
+    format: 'esm',
+    env: 'production',
     plugins: [{
       intro () {
         return 'export default function vueFactory (exports, SharedObject) {'

@@ -46,6 +46,9 @@ function remove (
   capture: boolean,
   _target?: HTMLElement,
 ) {
+  if (!handler) {
+    return
+  }
   (_target || target).removeEventListener(
     name,
     handler._wrapper || handler
