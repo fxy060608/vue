@@ -51,12 +51,11 @@ function getTarget(obj, path) {
 export function internalMixin(Vue: Class<Component>) {
 
   Vue.config.errorHandler = function(err) {
+    console.error(err)
     /* eslint-disable no-undef */
     const app = getApp()
     if (app && app.onError) {
       app.onError(err)
-    } else {
-      console.error(err)
     }
   }
 

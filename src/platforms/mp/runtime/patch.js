@@ -46,7 +46,7 @@ export const patch: Function = function(oldVnode, vnode) {
     Object.keys(data).forEach(key => { //仅同步 data 中有的数据
       mpData[key] = mpInstance.data[key]
     })
-    const diffData = diff(data, mpData)
+    const diffData = this.$shouldDiffData === false ? data : diff(data, mpData)
     if (Object.keys(diffData).length) {
       if (process.env.VUE_APP_DEBUG) {
         console.log('[' + (+new Date) + '][' + (mpInstance.is || mpInstance.route) + '][' + this._uid +
