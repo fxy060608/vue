@@ -11,5 +11,6 @@ module.exports = {
   weex: resolve('src/platforms/weex'),
   server: resolve('src/server'),
   sfc: resolve('src/sfc'),
-  mp: resolve('src/platforms/mp')
+  mp: resolve('src/platforms/mp'),
+  quickapp: resolve('src/platforms/quickapp')
 }

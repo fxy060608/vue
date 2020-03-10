@@ -35,6 +35,15 @@ const resolve = p => {
   }
 }
 
+const quickAppFactoryPlugin = {
+  intro () {
+    return 'module.exports = function quickAppFactory (exports, document, quickappHelper) {'
+  },
+  outro () {
+    return '}'
+  }
+}
+
 const builds = {
   // Runtime only (CommonJS). Used by bundlers e.g. Webpack & Browserify
   'web-runtime-cjs-dev': {
@@ -219,6 +228,14 @@ const builds = {
     format: 'es',
     banner
   },
+  'quickapp-runtime-cjs': {
+    quickapp: true,
+    entry: resolve('quickapp/entry-runtime-factory.js'),
+    dest: resolve('dist/quickapp.runtime.common.js'),
+    format: 'cjs',
+    plugins: [quickAppFactoryPlugin],
+    banner
+  }
 }
 
 function genConfig (name) {
