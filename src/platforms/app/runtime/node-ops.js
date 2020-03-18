@@ -77,9 +77,14 @@ export function insertBefore() {
 }
 
 export function removeChild(node, child) {
-  if (child && child._$vd) {
-    child._$vd.removeElement(child)
+  if (!child) {
+    return
   }
+  if (child.__vue__ && child.__vue__._$vd) {
+    // 根据组件cid删除所有相关element,后续应该建立一套完整的DOM逻辑
+    child.__vue__._$vd.removeElementByCid(child.__vue__._$id)
+  }
+  child._$vd && child._$vd.removeElement(child)
 }
 
 export function appendChild() {

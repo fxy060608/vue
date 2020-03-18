@@ -67,7 +67,7 @@ function updateDOMListeners (oldVnode: VNodeWithData, vnode: VNodeWithData) {
   target._$vd = vnode.context._$vd
   const context = vnode.context
   // 存储事件标记
-  target.setAttribute('nid', String(vnode.data.attrs['_i']))
+  target.setAttribute('nid', String((vnode.data.attrs || {})['_i']))
   target.setAttribute('cid', context._$id)
 
   normalizeEvents(on)
