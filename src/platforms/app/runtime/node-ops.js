@@ -1,106 +1,44 @@
-const noop = {}
-
-class UniElement {
-  constructor(tagName) {
-    this.tagName = tagName
-    this.cid = ''
-    this.nid = ''
-
-    this.events = Object.create(null)
-  }
-
-  setAttribute(key, value) {
-    if (key === 'cid') {
-      this.cid = value
-    } else if (key === 'nid') {
-      this.nid = value
-    }
-  }
-
-  dispatchEvent(name, target) {
-    const handlers = this.events[name]
-    if (!handlers) {
-      console.error(`cid=${this.cid},nid=${this.nid} dispatchEvent(${name}) not found`)
-    }
-    handlers.forEach(handler => {
-      handler(target)
-    })
-  }
-
-  addEventListener(name, handler) {
-    if (this.cid === '' || this.nid === '') {
-      return console.error(`cid=${this.cid},nid=${this.nid} addEventListener(${name}) not found`)
-    }
-    (this.events[name] || (this.events[name] = [])).push(handler)
-    this._$vd.addElement(this)
-  }
-
-  removeEventListener(name, handler) {
-    if (this.cid === '' || this.nid === '') {
-      return console.error(`cid=${this.cid},nid=${this.nid} removeEventListener(${name}) not found`)
-    }
-    let isRemoved = false
-    if (this.events[name]) {
-      const handlerIndex = this.events[name].indexOf(handler)
-      if (handlerIndex !== -1) {
-        this.events[name].splice(handlerIndex, 1)
-        isRemoved = true
-      }
-    }
-    if (!isRemoved) {
-      console.error(`cid=${this.cid},nid=${this.nid} removeEventListener(${name}) handler not found`)
-    }
-
-    Object.keys(this.events).every(eventType => this.events[eventType].length === 0) &&
-      this._$vd.removeElement(this)
-  }
-}
+import Comment from './vdom/Comment'
+import Element from './vdom/Element'
 
 export function createElement(tagName) {
-  return new UniElement(tagName)
+  return new Element(tagName)
 }
 
 export function createElementNS(namespace, tagName) {
-  return new UniElement(tagName)
+  return new Element(namespace + ':' + tagName)
 }
 
 export function createTextNode() {
-  return noop
+  return new Element('text')
 }
 
-export function createComment() {
-  return noop
+export function createComment(text) {
+  return new Comment(text)
 }
 
-export function insertBefore() {
-
+export function insertBefore(node, target, before) {
+  node.insertBefore(target, before)
 }
 
 export function removeChild(node, child) {
-  if (!child) {
-    return
-  }
-  if (child.__vue__ && child.__vue__._$vd) {
-    // 根据组件cid删除所有相关element,后续应该建立一套完整的DOM逻辑
-    child.__vue__._$vd.removeElementByCid(child.__vue__._$id)
-  }
-  child._$vd && child._$vd.removeElement(child)
+  node.removeChild(child)
 }
 
-export function appendChild() {
-
+export function appendChild(node, child) {
+  node.appendChild(child)
 }
 
-export function parentNode() {
-  return noop
+export function parentNode(node) {
+  return node.parentNode
 }
 
-export function nextSibling() {
-  return noop
+export function nextSibling(node) {
+  return node.nextSibling
 }
 
-export function tagName() {
-  return 'view'
+export function tagName(node) {
+  return node.type
 }
 
 export function setTextContent() {}

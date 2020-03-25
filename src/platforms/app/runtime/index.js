@@ -3,7 +3,7 @@
 import Vue from 'core/index'
 import { extend } from 'shared/util'
 import { mountComponent } from 'core/instance/lifecycle'
-
+import Document from './vdom/Document'
 import {
   mustUseProp,
   isReservedTag,
@@ -35,6 +35,12 @@ Vue.prototype.$mount = function (
   el?: string | Element,
   hydrating?: boolean
 ): Component {
+  if (this.$options.mpType === 'page') {
+    const doc = new Document(this.$options.pageId, this.$options.pagePath)
+    el = doc.createComment('root')
+    el.hasAttribute = el.removeAttribute = function(){} // hack for patch
+    doc.documentElement.appendChild(el)
+  }
   return mountComponent(this, el, hydrating)
 }
 Vue.use(plugin)

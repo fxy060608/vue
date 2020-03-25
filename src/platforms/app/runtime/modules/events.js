@@ -62,12 +62,21 @@ function updateDOMListeners (oldVnode: VNodeWithData, vnode: VNodeWithData) {
   const on = vnode.data.on || {}
   const oldOn = oldVnode.data.on || {}
   target = vnode.elm
-  
+
   // fixed by xxxxxx 存储 vd
   target._$vd = vnode.context._$vd
   const context = vnode.context
   // 存储事件标记
-  target.setAttribute('nid', String((vnode.data.attrs || {})['_i']))
+  let nid = (vnode.data.attrs || {})['_i']
+
+  let parent = vnode.parent
+  while (parent && parent.componentInstance) { // 使用组件外壳节点id
+    let parentId = parent.data.attrs && parent.data.attrs['_i']
+    isDef(parentId) && (nid = 'r-' + parentId)
+    parent = parent.parent
+  }
+
+  target.setAttribute('nid', String(nid))
   target.setAttribute('cid', context._$id)
 
   normalizeEvents(on)
