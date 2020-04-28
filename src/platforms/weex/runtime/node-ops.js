@@ -20,7 +20,7 @@ export function createTextNode (text: string) {
 export function createComment (text: string) {
   return document.createComment(text)
 }
-const TEXT_TAG_NAME = process.env.UNI_USING_WEEX ? 'text' : 'u-text'
+const TEXT_TAG_NAME = document.__$compiler__ === 'weex' ? 'text' : 'u-text'
 export function insertBefore (
   node: WeexElement,
   target: WeexElement,

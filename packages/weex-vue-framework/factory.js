@@ -5853,7 +5853,7 @@ function createTextNode (text) {
 function createComment (text) {
   return document.createComment(text)
 }
-var TEXT_TAG_NAME = process.env.UNI_USING_WEEX ? 'text' : 'u-text';
+var TEXT_TAG_NAME = document.__$compiler__ === 'weex' ? 'text' : 'u-text';
 function insertBefore (
   node,
   target,
