@@ -20,13 +20,14 @@ export function createTextNode (text: string) {
 export function createComment (text: string) {
   return document.createComment(text)
 }
-const TEXT_TAG_NAME = document.__$compiler__ === 'weex' ? 'text' : 'u-text'
+
 export function insertBefore (
   node: WeexElement,
   target: WeexElement,
   before: WeexElement
 ) {
   if (target.nodeType === 3) {
+    const TEXT_TAG_NAME = document.__$compiler__ === 'weex' ? 'text' : 'u-text'
     if (node.type === TEXT_TAG_NAME) {
       node.setAttr('value', target.text)
       target.parentNode = node
@@ -50,6 +51,7 @@ export function removeChild (node: WeexElement, child: WeexElement) {
 
 export function appendChild (node: WeexElement, child: WeexElement) {
   if (child.nodeType === 3) {
+    const TEXT_TAG_NAME = document.__$compiler__ === 'weex' ? 'text' : 'u-text'
     if (node.type === TEXT_TAG_NAME) {
       node.setAttr('value', child.text)
       child.parentNode = node

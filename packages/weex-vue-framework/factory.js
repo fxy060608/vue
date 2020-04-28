@@ -5853,13 +5853,14 @@ function createTextNode (text) {
 function createComment (text) {
   return document.createComment(text)
 }
-var TEXT_TAG_NAME = document.__$compiler__ === 'weex' ? 'text' : 'u-text';
+
 function insertBefore (
   node,
   target,
   before
 ) {
   if (target.nodeType === 3) {
+    var TEXT_TAG_NAME = document.__$compiler__ === 'weex' ? 'text' : 'u-text';
     if (node.type === TEXT_TAG_NAME) {
       node.setAttr('value', target.text);
       target.parentNode = node;
@@ -5883,6 +5884,7 @@ function removeChild (node, child) {
 
 function appendChild (node, child) {
   if (child.nodeType === 3) {
+    var TEXT_TAG_NAME = document.__$compiler__ === 'weex' ? 'text' : 'u-text';
     if (node.type === TEXT_TAG_NAME) {
       node.setAttr('value', child.text);
       child.parentNode = node;
