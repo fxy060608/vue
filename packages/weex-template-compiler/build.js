@@ -481,11 +481,10 @@ function parseHTML (html, options) {
         name: args[1],
         value: decodeAttr(value, shouldDecodeNewlines)
       };
-      // fixed by xxxxxx <video controls/>
-      // if (process.env.NODE_ENV !== 'production' && options.outputSourceRange) {
+      if (process.env.NODE_ENV !== 'production' && options.outputSourceRange) {
         attrs[i].start = args.start + args[0].match(/^\s*/).length;
         attrs[i].end = args.end;
-      // }
+      }
     }
 
     if (!unary) {
