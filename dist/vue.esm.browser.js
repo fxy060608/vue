@@ -1,6 +1,6 @@
 /*!
  * Vue.js v2.6.11
- * (c) 2014-2019 Evan You
+ * (c) 2014-2020 Evan You
  * Released under the MIT License.
  */
 /*  */
@@ -637,7 +637,10 @@ let formatComponentName = (noop);
   };
 
   formatComponentName = (vm, includeFile) => {
-    if (vm.$root === vm) {
+    if (vm.$root === vm) { // fixed by xxxxxx
+      if (vm.$scope && vm.$scope.route) { // v3
+        return vm.$scope.route
+      }
       return '<Root>'
     }
     const options = typeof vm === 'function' && vm.cid != null
@@ -716,7 +719,13 @@ class Dep {
   
 
   constructor () {
-    this.id = uid++;
+    // fixed by xxxxxx (nvue vuex)
+    /* eslint-disable no-undef */
+    if(typeof SharedObject !== 'undefined'){
+      this.id = SharedObject.uid++;
+    } else {
+      this.id = uid++;
+    }
     this.subs = [];
   }
 
@@ -729,8 +738,8 @@ class Dep {
   }
 
   depend () {
-    if (Dep.target) {
-      Dep.target.addDep(this);
+    if (Dep.SharedObject.target) { // fixed by xxxxxx
+      Dep.SharedObject.target.addDep(this);
     }
   }
 
@@ -752,17 +761,20 @@ class Dep {
 // The current target watcher being evaluated.
 // This is globally unique because only one watcher
 // can be evaluated at a time.
-Dep.target = null;
-const targetStack = [];
+// fixed by xxxxxx (nvue shared vuex)
+/* eslint-disable no-undef */
+Dep.SharedObject = typeof SharedObject !== 'undefined' ? SharedObject : {};
+Dep.SharedObject.target = null;
+Dep.SharedObject.targetStack = [];
 
 function pushTarget (target) {
-  targetStack.push(target);
-  Dep.target = target;
+  Dep.SharedObject.targetStack.push(target);
+  Dep.SharedObject.target = target;
 }
 
 function popTarget () {
-  targetStack.pop();
-  Dep.target = targetStack[targetStack.length - 1];
+  Dep.SharedObject.targetStack.pop();
+  Dep.SharedObject.target = Dep.SharedObject.targetStack[Dep.SharedObject.targetStack.length - 1];
 }
 
 /*  */
@@ -1068,7 +1080,7 @@ function defineReactive$$1 (
     configurable: true,
     get: function reactiveGetter () {
       const value = getter ? getter.call(obj) : val;
-      if (Dep.target) {
+      if (Dep.SharedObject.target) { // fixed by xxxxxx
         dep.depend();
         if (childOb) {
           childOb.dep.depend();
@@ -1929,8 +1941,6 @@ function logError (err, vm, info) {
 
 /*  */
 
-let isUsingMicroTask = false;
-
 const callbacks = [];
 let pending = false;
 
@@ -1954,7 +1964,10 @@ function flushCallbacks () {
 // where microtasks have too high a priority and fire in between supposedly
 // sequential events (e.g. #4521, #6690, which have workarounds)
 // or even between bubbling of the same event (#6566).
-let timerFunc;
+// fixed by xxxxxx app-plus 平台 Promise 执行顺序不一致,导致各种乱七八糟的 Bug,统一使用 setTimeout
+let timerFunc = () => {
+  setTimeout(flushCallbacks, 0);
+};
 
 // The nextTick behavior leverages the microtask queue, which can be accessed
 // via either native Promise.then or MutationObserver.
@@ -1963,50 +1976,50 @@ let timerFunc;
 // completely stops working after triggering a few times... so, if native
 // Promise is available, we will use it:
 /* istanbul ignore next, $flow-disable-line */
-if (typeof Promise !== 'undefined' && isNative(Promise)) {
-  const p = Promise.resolve();
-  timerFunc = () => {
-    p.then(flushCallbacks);
-    // In problematic UIWebViews, Promise.then doesn't completely break, but
-    // it can get stuck in a weird state where callbacks are pushed into the
-    // microtask queue but the queue isn't being flushed, until the browser
-    // needs to do some other work, e.g. handle a timer. Therefore we can
-    // "force" the microtask queue to be flushed by adding an empty timer.
-    if (isIOS) setTimeout(noop);
-  };
-  isUsingMicroTask = true;
-} else if (!isIE && typeof MutationObserver !== 'undefined' && (
-  isNative(MutationObserver) ||
-  // PhantomJS and iOS 7.x
-  MutationObserver.toString() === '[object MutationObserverConstructor]'
-)) {
-  // Use MutationObserver where native Promise is not available,
-  // e.g. PhantomJS, iOS7, Android 4.4
-  // (#6466 MutationObserver is unreliable in IE11)
-  let counter = 1;
-  const observer = new MutationObserver(flushCallbacks);
-  const textNode = document.createTextNode(String(counter));
-  observer.observe(textNode, {
-    characterData: true
-  });
-  timerFunc = () => {
-    counter = (counter + 1) % 2;
-    textNode.data = String(counter);
-  };
-  isUsingMicroTask = true;
-} else if (typeof setImmediate !== 'undefined' && isNative(setImmediate)) {
-  // Fallback to setImmediate.
-  // Technically it leverages the (macro) task queue,
-  // but it is still a better choice than setTimeout.
-  timerFunc = () => {
-    setImmediate(flushCallbacks);
-  };
-} else {
-  // Fallback to setTimeout.
-  timerFunc = () => {
-    setTimeout(flushCallbacks, 0);
-  };
-}
+// if (typeof Promise !== 'undefined' && isNative(Promise)) {
+//   const p = Promise.resolve()
+//   timerFunc = () => {
+//     p.then(flushCallbacks)
+//     // In problematic UIWebViews, Promise.then doesn't completely break, but
+//     // it can get stuck in a weird state where callbacks are pushed into the
+//     // microtask queue but the queue isn't being flushed, until the browser
+//     // needs to do some other work, e.g. handle a timer. Therefore we can
+//     // "force" the microtask queue to be flushed by adding an empty timer.
+//     if (isIOS) setTimeout(noop)
+//   }
+//   isUsingMicroTask = true
+// } else if (!isIE && typeof MutationObserver !== 'undefined' && (
+//   isNative(MutationObserver) ||
+//   // PhantomJS and iOS 7.x
+//   MutationObserver.toString() === '[object MutationObserverConstructor]'
+// )) {
+//   // Use MutationObserver where native Promise is not available,
+//   // e.g. PhantomJS, iOS7, Android 4.4
+//   // (#6466 MutationObserver is unreliable in IE11)
+//   let counter = 1
+//   const observer = new MutationObserver(flushCallbacks)
+//   const textNode = document.createTextNode(String(counter))
+//   observer.observe(textNode, {
+//     characterData: true
+//   })
+//   timerFunc = () => {
+//     counter = (counter + 1) % 2
+//     textNode.data = String(counter)
+//   }
+//   isUsingMicroTask = true
+// } else if (typeof setImmediate !== 'undefined' && isNative(setImmediate)) {
+//   // Fallback to setImmediate.
+//   // Technically it leverages the (macro) task queue,
+//   // but it is still a better choice than setTimeout.
+//   timerFunc = () => {
+//     setImmediate(flushCallbacks)
+//   }
+// } else {
+//   // Fallback to setTimeout.
+//   timerFunc = () => {
+//     setTimeout(flushCallbacks, 0)
+//   }
+// }
 
 function nextTick (cb, ctx) {
   let _resolve;
@@ -2293,17 +2306,50 @@ function mergeVNodeHook (def, hookKey, hook) {
 
 /*  */
 
+// fixed by xxxxxx (mp properties)
+function extractPropertiesFromVNodeData(data, Ctor, res, context) {
+  const propOptions = Ctor.options.mpOptions && Ctor.options.mpOptions.properties;
+  if (isUndef(propOptions)) {
+    return res
+  }
+  const externalClasses = Ctor.options.mpOptions.externalClasses || [];
+  const {
+    attrs,
+    props
+  } = data;
+  if (isDef(attrs) || isDef(props)) {
+    for (const key in propOptions) {
+      const altKey = hyphenate(key);
+      const result = checkProp(res, props, key, altKey, true) ||
+          checkProp(res, attrs, key, altKey, false);
+      // externalClass
+      if (
+        result &&
+        res[key] &&
+        externalClasses.indexOf(altKey) !== -1 &&
+        context[camelize(res[key])]
+      ) {
+        // 赋值 externalClass 真正的值(模板里 externalClass 的值可能是字符串)
+        res[key] = context[camelize(res[key])];
+      }
+    }
+  }
+  return res
+}
+
 function extractPropsFromVNodeData (
   data,
   Ctor,
-  tag
+  tag,
+  context,// fixed by xxxxxx
 ) {
   // we are only extracting raw values here.
   // validation and default values are handled in the child
   // component itself.
   const propOptions = Ctor.options.props;
   if (isUndef(propOptions)) {
-    return
+    // fixed by xxxxxx
+    return extractPropertiesFromVNodeData(data, Ctor, {}, context)
   }
   const res = {};
   const { attrs, props } = data;
@@ -2330,7 +2376,8 @@ function extractPropsFromVNodeData (
       checkProp(res, attrs, key, altKey, false);
     }
   }
-  return res
+  // fixed by xxxxxx
+  return extractPropertiesFromVNodeData(data, Ctor, res, context)
 }
 
 function checkProp (
@@ -2715,7 +2762,8 @@ function renderSlot (
       }
       props = extend(extend({}, bindObject), props);
     }
-    nodes = scopedSlotFn(props) || fallback;
+    // fixed by xxxxxx app-plus scopedSlot
+    nodes = scopedSlotFn(props, this, props._i) || fallback;
   } else {
     nodes = this.$slots[name] || fallback;
   }
@@ -3165,6 +3213,8 @@ const componentVNodeHooks = {
       // fixed by xxxxxx
       componentInstance._isMounted = true;
       if (componentInstance._$vd) {// 延迟 mounted
+        callHook(componentInstance, 'onServiceCreated');
+        callHook(componentInstance, 'onServiceAttached');
         componentInstance._$vd.addMountedVm(componentInstance);
       } else {
         callHook(componentInstance, 'mounted');
@@ -3256,7 +3306,7 @@ function createComponent (
   }
 
   // extract props
-  const propsData = extractPropsFromVNodeData(data, Ctor, tag);
+  const propsData = extractPropsFromVNodeData(data, Ctor, tag, context); // fixed by xxxxxx
 
   // functional component
   if (isTrue(Ctor.options.functional)) {
@@ -4109,6 +4159,8 @@ function mountComponent (
     // fixed by xxxxxx
     vm._isMounted = true;
     if (vm._$vd) {// 延迟 mounted 事件
+      callHook(vm, 'onServiceCreated');
+      callHook(vm, 'onServiceAttached');
       vm._$vd.addMountedVm(vm);
     } else {
       callHook(vm, 'mounted');
@@ -4179,6 +4231,9 @@ function updateChildComponent (
     // keep a copy of raw propsData
     vm.$options.propsData = propsData;
   }
+
+  // fixed by xxxxxx update properties(mp runtime)
+  vm._$updateProperties && vm._$updateProperties(vm);
 
   // update listeners
   listeners = listeners || emptyObject;
@@ -4258,7 +4313,7 @@ function callHook (vm, hook) {
 
 const MAX_UPDATE_COUNT = 100;
 
-const queue = [];
+const queue = []; // fixed by xxxxxx
 const activatedChildren = [];
 let has = {};
 let circular = {};
@@ -4882,7 +4937,7 @@ function createComputedGetter (key) {
       if (watcher.dirty) {
         watcher.evaluate();
       }
-      if (Dep.target) {
+      if (Dep.SharedObject.target) { // fixed by xxxxxx
         watcher.depend();
       }
       return watcher.value
@@ -6174,7 +6229,7 @@ function createPatchFunction (backend) {
 
   function removeAndInvokeRemoveHook (vnode, rm) {
     if (isDef(rm) || isDef(vnode.data)) {
-      let i;
+      let i, children;
       const listeners = cbs.remove.length + 1;
       if (isDef(rm)) {
         // we have a recursively passed down rm callback
@@ -6187,6 +6242,15 @@ function createPatchFunction (backend) {
       // recursively invoke hooks on child component root node
       if (isDef(i = vnode.componentInstance) && isDef(i = i._vnode) && isDef(i.data)) {
         removeAndInvokeRemoveHook(i, rm);
+      } else if (isDef(children = vnode.children)) {
+        // fixed by xxxxxx
+        // app-plus service 层 elm 暂未实现父子关系维护，移除父 elm 时，导致子 elm 还存留(影响了事件查找)
+        // 暂时使用 vnode 的 children 递归 rm 掉子 elm
+        for (i = 0; i < children.length; i++) {
+          if (children[i].tag) {
+            removeAndInvokeRemoveHook(children[i]);
+          }
+        }
       }
       for (i = 0; i < cbs.remove.length; ++i) {
         cbs.remove[i](vnode, rm);
@@ -7542,47 +7606,12 @@ function createOnceHandler$1 (event, handler, capture) {
   }
 }
 
-// #9446: Firefox <= 53 (in particular, ESR 52) has incorrect Event.timeStamp
-// implementation and does not fire microtasks in between event propagation, so
-// safe to exclude.
-const useMicrotaskFix = isUsingMicroTask && !(isFF && Number(isFF[1]) <= 53);
-
 function add$1 (
   name,
   handler,
   capture,
   passive
 ) {
-  // async edge case #6566: inner click event triggers patch, event handler
-  // attached to outer element during patch, and triggered again. This
-  // happens because browsers fire microtask ticks between event propagation.
-  // the solution is simple: we save the timestamp when a handler is attached,
-  // and the handler would only fire if the event passed to it was fired
-  // AFTER it was attached.
-  if (useMicrotaskFix) {
-    const attachedTimestamp = currentFlushTimestamp;
-    const original = handler;
-    handler = original._wrapper = function (e) {
-      if (
-        // no bubbling, should always fire.
-        // this is just a safety net in case event.timeStamp is unreliable in
-        // certain weird environments...
-        e.target === e.currentTarget ||
-        // event is fired after handler attachment
-        e.timeStamp >= attachedTimestamp ||
-        // bail for environments that have buggy event.timeStamp implementations
-        // #9462 iOS 9 bug: event.timeStamp is 0 after history.pushState
-        // #9681 QtWebEngine event.timeStamp is negative value
-        e.timeStamp <= 0 ||
-        // #9448 bail if event is fired in another document in a multi-page
-        // electron/nw.js app, since event.timeStamp will be using a different
-        // starting reference
-        e.target.ownerDocument !== document
-      ) {
-        return original.apply(this, arguments)
-      }
-    };
-  }
   target$1.addEventListener(
     name,
     handler,

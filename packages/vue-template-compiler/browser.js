@@ -964,7 +964,10 @@
     };
 
     formatComponentName = function (vm, includeFile) {
-      if (vm.$root === vm) {
+      if (vm.$root === vm) { // fixed by xxxxxx
+        if (vm.$scope && vm.$scope.route) { // v3
+          return vm.$scope.route
+        }
         return '<Root>'
       }
       var options = typeof vm === 'function' && vm.cid != null
@@ -1034,7 +1037,13 @@
    * directives subscribing to it.
    */
   var Dep = function Dep () {
-    this.id = uid++;
+    // fixed by xxxxxx (nvue vuex)
+    /* eslint-disable no-undef */
+    if(typeof SharedObject !== 'undefined'){
+      this.id = SharedObject.uid++;
+    } else {
+      this.id = uid++;
+    }
     this.subs = [];
   };
 
@@ -1047,8 +1056,8 @@
   };
 
   Dep.prototype.depend = function depend () {
-    if (Dep.target) {
-      Dep.target.addDep(this);
+    if (Dep.SharedObject.target) { // fixed by xxxxxx
+      Dep.SharedObject.target.addDep(this);
     }
   };
 
@@ -1063,7 +1072,11 @@
   // The current target watcher being evaluated.
   // This is globally unique because only one watcher
   // can be evaluated at a time.
-  Dep.target = null;
+  // fixed by xxxxxx (nvue shared vuex)
+  /* eslint-disable no-undef */
+  Dep.SharedObject = typeof SharedObject !== 'undefined' ? SharedObject : {};
+  Dep.SharedObject.target = null;
+  Dep.SharedObject.targetStack = [];
 
   /*  */
 
@@ -1294,7 +1307,7 @@
       configurable: true,
       get: function reactiveGetter () {
         var value = getter ? getter.call(obj) : val;
-        if (Dep.target) {
+        if (Dep.SharedObject.target) { // fixed by xxxxxx
           dep.depend();
           if (childOb) {
             childOb.dep.depend();
@@ -1641,39 +1654,6 @@
   /*  */
 
   /*  */
-
-  var callbacks = [];
-
-  function flushCallbacks () {
-    var copies = callbacks.slice(0);
-    callbacks.length = 0;
-    for (var i = 0; i < copies.length; i++) {
-      copies[i]();
-    }
-  }
-
-  // The nextTick behavior leverages the microtask queue, which can be accessed
-  // via either native Promise.then or MutationObserver.
-  // MutationObserver has wider support, however it is seriously bugged in
-  // UIWebView in iOS >= 9.3.3 when triggered in touch event handlers. It
-  // completely stops working after triggering a few times... so, if native
-  // Promise is available, we will use it:
-  /* istanbul ignore next, $flow-disable-line */
-  if (typeof Promise !== 'undefined' && isNative(Promise)) ; else if (!isIE && typeof MutationObserver !== 'undefined' && (
-    isNative(MutationObserver) ||
-    // PhantomJS and iOS 7.x
-    MutationObserver.toString() === '[object MutationObserverConstructor]'
-  )) {
-    // Use MutationObserver where native Promise is not available,
-    // e.g. PhantomJS, iOS7, Android 4.4
-    // (#6466 MutationObserver is unreliable in IE11)
-    var counter = 1;
-    var observer = new MutationObserver(flushCallbacks);
-    var textNode = document.createTextNode(String(counter));
-    observer.observe(textNode, {
-      characterData: true
-    });
-  } else if (typeof setImmediate !== 'undefined' && isNative(setImmediate)) ;
 
   /*  */
 

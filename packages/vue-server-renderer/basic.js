@@ -915,7 +915,10 @@
     };
 
     formatComponentName = function (vm, includeFile) {
-      if (vm.$root === vm) {
+      if (vm.$root === vm) { // fixed by xxxxxx
+        if (vm.$scope && vm.$scope.route) { // v3
+          return vm.$scope.route
+        }
         return '<Root>'
       }
       var options = typeof vm === 'function' && vm.cid != null
@@ -985,7 +988,13 @@
    * directives subscribing to it.
    */
   var Dep = function Dep () {
-    this.id = uid++;
+    // fixed by xxxxxx (nvue vuex)
+    /* eslint-disable no-undef */
+    if(typeof SharedObject !== 'undefined'){
+      this.id = SharedObject.uid++;
+    } else {
+      this.id = uid++;
+    }
     this.subs = [];
   };
 
@@ -998,8 +1007,8 @@
   };
 
   Dep.prototype.depend = function depend () {
-    if (Dep.target) {
-      Dep.target.addDep(this);
+    if (Dep.SharedObject.target) { // fixed by xxxxxx
+      Dep.SharedObject.target.addDep(this);
     }
   };
 
@@ -1014,17 +1023,20 @@
   // The current target watcher being evaluated.
   // This is globally unique because only one watcher
   // can be evaluated at a time.
-  Dep.target = null;
-  var targetStack = [];
+  // fixed by xxxxxx (nvue shared vuex)
+  /* eslint-disable no-undef */
+  Dep.SharedObject = typeof SharedObject !== 'undefined' ? SharedObject : {};
+  Dep.SharedObject.target = null;
+  Dep.SharedObject.targetStack = [];
 
   function pushTarget (target) {
-    targetStack.push(target);
-    Dep.target = target;
+    Dep.SharedObject.targetStack.push(target);
+    Dep.SharedObject.target = target;
   }
 
   function popTarget () {
-    targetStack.pop();
-    Dep.target = targetStack[targetStack.length - 1];
+    Dep.SharedObject.targetStack.pop();
+    Dep.SharedObject.target = Dep.SharedObject.targetStack[Dep.SharedObject.targetStack.length - 1];
   }
 
   /*
@@ -1213,7 +1225,7 @@
       configurable: true,
       get: function reactiveGetter () {
         var value = getter ? getter.call(obj) : val;
-        if (Dep.target) {
+        if (Dep.SharedObject.target) { // fixed by xxxxxx
           dep.depend();
           if (childOb) {
             childOb.dep.depend();
@@ -2035,39 +2047,6 @@
   }
 
   /*  */
-
-  var callbacks = [];
-
-  function flushCallbacks () {
-    var copies = callbacks.slice(0);
-    callbacks.length = 0;
-    for (var i = 0; i < copies.length; i++) {
-      copies[i]();
-    }
-  }
-
-  // The nextTick behavior leverages the microtask queue, which can be accessed
-  // via either native Promise.then or MutationObserver.
-  // MutationObserver has wider support, however it is seriously bugged in
-  // UIWebView in iOS >= 9.3.3 when triggered in touch event handlers. It
-  // completely stops working after triggering a few times... so, if native
-  // Promise is available, we will use it:
-  /* istanbul ignore next, $flow-disable-line */
-  if (typeof Promise !== 'undefined' && isNative(Promise)) ; else if (!isIE && typeof MutationObserver !== 'undefined' && (
-    isNative(MutationObserver) ||
-    // PhantomJS and iOS 7.x
-    MutationObserver.toString() === '[object MutationObserverConstructor]'
-  )) {
-    // Use MutationObserver where native Promise is not available,
-    // e.g. PhantomJS, iOS7, Android 4.4
-    // (#6466 MutationObserver is unreliable in IE11)
-    var counter = 1;
-    var observer = new MutationObserver(flushCallbacks);
-    var textNode = document.createTextNode(String(counter));
-    observer.observe(textNode, {
-      characterData: true
-    });
-  } else if (typeof setImmediate !== 'undefined' && isNative(setImmediate)) ;
 
   /*  */
 
@@ -6991,17 +6970,48 @@
 
   /*  */
 
+  // fixed by xxxxxx (mp properties)
+  function extractPropertiesFromVNodeData(data, Ctor, res, context) {
+    var propOptions = Ctor.options.mpOptions && Ctor.options.mpOptions.properties;
+    if (isUndef(propOptions)) {
+      return res
+    }
+    var externalClasses = Ctor.options.mpOptions.externalClasses || [];
+    var attrs = data.attrs;
+    var props = data.props;
+    if (isDef(attrs) || isDef(props)) {
+      for (var key in propOptions) {
+        var altKey = hyphenate(key);
+        var result = checkProp(res, props, key, altKey, true) ||
+            checkProp(res, attrs, key, altKey, false);
+        // externalClass
+        if (
+          result &&
+          res[key] &&
+          externalClasses.indexOf(altKey) !== -1 &&
+          context[camelize(res[key])]
+        ) {
+          // 赋值 externalClass 真正的值(模板里 externalClass 的值可能是字符串)
+          res[key] = context[camelize(res[key])];
+        }
+      }
+    }
+    return res
+  }
+
   function extractPropsFromVNodeData (
     data,
     Ctor,
-    tag
+    tag,
+    context// fixed by xxxxxx
   ) {
     // we are only extracting raw values here.
     // validation and default values are handled in the child
     // component itself.
     var propOptions = Ctor.options.props;
     if (isUndef(propOptions)) {
-      return
+      // fixed by xxxxxx
+      return extractPropertiesFromVNodeData(data, Ctor, {}, context)
     }
     var res = {};
     var attrs = data.attrs;
@@ -7029,7 +7039,8 @@
         checkProp(res, attrs, key, altKey, false);
       }
     }
-    return res
+    // fixed by xxxxxx
+    return extractPropertiesFromVNodeData(data, Ctor, res, context)
   }
 
   function checkProp (
@@ -7261,7 +7272,8 @@
         }
         props = extend(extend({}, bindObject), props);
       }
-      nodes = scopedSlotFn(props) || fallback;
+      // fixed by xxxxxx app-plus scopedSlot
+      nodes = scopedSlotFn(props, this, props._i) || fallback;
     } else {
       nodes = this.$slots[name] || fallback;
     }
@@ -7915,6 +7927,9 @@
       vm.$options.propsData = propsData;
     }
 
+    // fixed by xxxxxx update properties(mp runtime)
+    vm._$updateProperties && vm._$updateProperties(vm);
+
     // update listeners
     listeners = listeners || emptyObject;
     var oldListeners = vm.$options._parentListeners;
@@ -8290,6 +8305,8 @@
         // fixed by xxxxxx
         componentInstance._isMounted = true;
         if (componentInstance._$vd) {// 延迟 mounted
+          callHook(componentInstance, 'onServiceCreated');
+          callHook(componentInstance, 'onServiceAttached');
           componentInstance._$vd.addMountedVm(componentInstance);
         } else {
           callHook(componentInstance, 'mounted');
@@ -8381,7 +8398,7 @@
     }
 
     // extract props
-    var propsData = extractPropsFromVNodeData(data, Ctor, tag);
+    var propsData = extractPropsFromVNodeData(data, Ctor, tag, context); // fixed by xxxxxx
 
     // functional component
     if (isTrue(Ctor.options.functional)) {
