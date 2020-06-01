@@ -34,12 +34,18 @@ if (process.env.NODE_ENV !== 'production') {
   }
 
   formatComponentName = (vm, includeFile) => {
-    if(__MP__){
+    if (__MP__) { // fixed by xxxxxx
       if(vm.$scope && vm.$scope.is){
         return vm.$scope.is
       }
     }
-    if (vm.$root === vm) {
+    if (vm.$root === vm) { // fixed by xxxxxx
+      if (vm.$scope && vm.$scope.route) { // v3
+        return vm.$scope.route
+      }
+      if (vm.route) { // h5
+        return vm.route
+      }
       return '<Root>'
     }
     const options = typeof vm === 'function' && vm.cid != null

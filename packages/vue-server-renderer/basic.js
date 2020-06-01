@@ -915,7 +915,13 @@
     };
 
     formatComponentName = function (vm, includeFile) {
-      if (vm.$root === vm) {
+      if (vm.$root === vm) { // fixed by xxxxxx
+        if (vm.$scope && vm.$scope.route) { // v3
+          return vm.$scope.route
+        }
+        if (vm.route) { // h5
+          return vm.route
+        }
         return '<Root>'
       }
       var options = typeof vm === 'function' && vm.cid != null

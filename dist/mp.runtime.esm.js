@@ -623,12 +623,18 @@ if (process.env.NODE_ENV !== 'production') {
   };
 
   formatComponentName = function (vm, includeFile) {
-    {
+    { // fixed by xxxxxx
       if(vm.$scope && vm.$scope.is){
         return vm.$scope.is
       }
     }
-    if (vm.$root === vm) {
+    if (vm.$root === vm) { // fixed by xxxxxx
+      if (vm.$scope && vm.$scope.route) { // v3
+        return vm.$scope.route
+      }
+      if (vm.route) { // h5
+        return vm.route
+      }
       return '<Root>'
     }
     var options = typeof vm === 'function' && vm.cid != null
@@ -5806,9 +5812,10 @@ function getTarget(obj, path) {
   return getTarget(obj[key], parts.slice(1).join('.'))
 }
 
-function internalMixin(Vue) {
+function internalMixin(Vue ) {
 
-  Vue.config.errorHandler = function(err) {
+  Vue.config.errorHandler = function(err, vm, info) {
+    Vue.util.warn(("Error in " + info + ": \"" + (err.toString()) + "\""), vm);
     console.error(err);
     /* eslint-disable no-undef */
     var app = getApp();

@@ -48,9 +48,10 @@ function getTarget(obj, path) {
   return getTarget(obj[key], parts.slice(1).join('.'))
 }
 
-export function internalMixin(Vue: Class<Component>) {
+export function internalMixin(Vue: Class < Component > ) {
 
-  Vue.config.errorHandler = function(err) {
+  Vue.config.errorHandler = function(err, vm, info) {
+    Vue.util.warn(`Error in ${info}: "${err.toString()}"`, vm)
     console.error(err)
     /* eslint-disable no-undef */
     const app = getApp()
