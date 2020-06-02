@@ -35,8 +35,8 @@ if (process.env.NODE_ENV !== 'production') {
 
   formatComponentName = (vm, includeFile) => {
     if (vm.$root === vm) { // fixed by xxxxxx
-      if (vm.$scope && vm.$scope.route) { // v3
-        return vm.$scope.route
+      if (vm.$options && vm.$options.__file){
+        return `at ${vm.$options.__file}:1`
       }
       return '<Root>'
     }
@@ -54,7 +54,7 @@ if (process.env.NODE_ENV !== 'production') {
 
     return (
       (name ? `<${classify(name)}>` : `<Anonymous>`) +
-      (file && includeFile !== false ? ` at ${file}` : '')
+      (file && includeFile !== false ? ` at ${file}:1` : '')
     )
   }
 
@@ -89,7 +89,7 @@ if (process.env.NODE_ENV !== 'production') {
       }
       return '\n\nfound in\n\n' + tree
         .map((vm, i) => `${
-          i === 0 ? '---> ' : repeat(' ', 5 + i * 2)
+          i === 0 ? '---> ' : repeat('　', 3 + i * 1)
         }${
           Array.isArray(vm)
             ? `${formatComponentName(vm[0])}... (${vm[1]} recursive calls)`
@@ -97,7 +97,7 @@ if (process.env.NODE_ENV !== 'production') {
         }`)
         .join('\n')
     } else {
-      return `\n\n(found in ${formatComponentName(vm)})`
+      return `\n\n(found ${formatComponentName(vm)})`
     }
   }
 }
