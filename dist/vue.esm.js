@@ -638,12 +638,9 @@ if (process.env.NODE_ENV !== 'production') {
   };
 
   formatComponentName = function (vm, includeFile) {
-    if (vm.$root === vm) { // fixed by xxxxxx
-      if (vm.$scope && vm.$scope.route) { // v3
-        return vm.$scope.route
-      }
-      if (vm.route) { // h5
-        return vm.route
+    if (vm.$root === vm) {
+      if (vm.$options && vm.$options.__file) { // fixed by xxxxxx
+        return ('at ') + vm.$options.__file
       }
       return '<Root>'
     }
@@ -679,7 +676,7 @@ if (process.env.NODE_ENV !== 'production') {
     if (vm._isVue && vm.$parent) {
       var tree = [];
       var currentRecursiveSequence = 0;
-      while (vm) {
+      while (vm && vm.$options.name !== 'PageBody') {
         if (tree.length > 0) {
           var last = tree[tree.length - 1];
           if (last.constructor === vm.constructor) {
@@ -691,7 +688,7 @@ if (process.env.NODE_ENV !== 'production') {
             currentRecursiveSequence = 0;
           }
         }
-        tree.push(vm);
+        !vm.$options.isReserved && tree.push(vm);
         vm = vm.$parent;
       }
       return '\n\nfound in\n\n' + tree
