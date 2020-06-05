@@ -9,6 +9,10 @@ import {
     updateElemStyle
 } from 'weex/util/class'
 
+import {
+  genClassForVnode
+} from 'weex/util/class-list'
+
 function updateClass(oldVnode: VNodeWithData, vnode: VNodeWithData) {
     const data: VNodeData = vnode.data
     const oldData: VNodeData = oldVnode.data
@@ -22,6 +26,11 @@ function updateClass(oldVnode: VNodeWithData, vnode: VNodeWithData) {
         )
     ) {
         return
+    }
+
+    if (document.__$automator__) {
+      const cls = genClassForVnode(vnode)
+      vnode.elm.setClassList && vnode.elm.setClassList(cls.split(' '))
     }
 
     updateElemStyle(
