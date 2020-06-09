@@ -25,7 +25,7 @@ function mergeClassData (child: VNodeData, parent: VNodeData): {
   class: any
 } {
   return {
-    staticClass: concat(child.staticClass, parent.staticClass),
+    staticClass: concat(stringifyClass(child.staticClass), stringifyClass(parent.staticClass)),
     class: isDef(child.class)
       ? [child.class, parent.class]
       : parent.class

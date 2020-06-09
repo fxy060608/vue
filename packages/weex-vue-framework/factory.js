@@ -7194,7 +7194,7 @@ function genClassForVnode (vnode) {
 
 function mergeClassData (child, parent) {
   return {
-    staticClass: concat(child.staticClass, parent.staticClass),
+    staticClass: concat(stringifyClass(child.staticClass), stringifyClass(parent.staticClass)),
     class: isDef(child.class)
       ? [child.class, parent.class]
       : parent.class
