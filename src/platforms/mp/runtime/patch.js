@@ -16,6 +16,15 @@ function cloneWithData(vm) {
     ret[key] = vm[key]
     return ret
   }, ret)
+
+  // vue-composition-api
+  const rawBindings = vm.__secret_vfa_state__ && vm.__secret_vfa_state__.rawBindings
+  if (rawBindings) {
+    Object.keys(rawBindings).forEach(key => {
+      ret[key] = vm[key]
+    })
+  }
+  
   //TODO 需要把无用数据处理掉，比如 list=>l0 则 list 需要移除，否则多传输一份数据
   Object.assign(ret, vm.$mp.data || {})
   if (

@@ -225,7 +225,7 @@ function leave (vnode, rm) {
 }
 
 // determine the target animation style for an entering transition.
-function getEnterTargetState (el, stylesheet, startClass, endClass, activeClass, vm) {
+function getEnterTargetState (el, stylesheet, startClass, endClass, activeClass) {
   const targetState = {}
   const startState = stylesheet[startClass]
   const endState = stylesheet[endClass]

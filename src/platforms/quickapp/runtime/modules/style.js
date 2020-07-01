@@ -10,6 +10,7 @@ function normalizeStyle (cssText) {
   const regex = /([\w-]*)\s*:\s*([^;]*)/g
   const rules = {}
   let match
+  /* eslint-disable no-cond-assign */
   while (match = regex.exec(cssText)) {
     rules[match[1]] = match[2].trim()
   }
