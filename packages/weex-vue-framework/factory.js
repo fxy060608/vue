@@ -1929,7 +1929,10 @@ function flushCallbacks () {
 // where microtasks have too high a priority and fire in between supposedly
 // sequential events (e.g. #4521, #6690, which have workarounds)
 // or even between bubbling of the same event (#6566).
-var timerFunc;
+// fixed by xxxxxx app-plus 平台 Promise 执行顺序不一致,导致各种乱七八糟的 Bug,统一使用 setTimeout
+var timerFunc = function () {
+  setTimeout(flushCallbacks, 0);
+};
 
 // The nextTick behavior leverages the microtask queue, which can be accessed
 // via either native Promise.then or MutationObserver.
@@ -1938,48 +1941,50 @@ var timerFunc;
 // completely stops working after triggering a few times... so, if native
 // Promise is available, we will use it:
 /* istanbul ignore next, $flow-disable-line */
-if (typeof Promise !== 'undefined' && isNative(Promise)) {
-  var p = Promise.resolve();
-  timerFunc = function () {
-    p.then(flushCallbacks);
-    // In problematic UIWebViews, Promise.then doesn't completely break, but
-    // it can get stuck in a weird state where callbacks are pushed into the
-    // microtask queue but the queue isn't being flushed, until the browser
-    // needs to do some other work, e.g. handle a timer. Therefore we can
-    // "force" the microtask queue to be flushed by adding an empty timer.
-    if (isIOS) { setTimeout(noop); }
-  };
-} else if (!isIE && typeof MutationObserver !== 'undefined' && (
-  isNative(MutationObserver) ||
-  // PhantomJS and iOS 7.x
-  MutationObserver.toString() === '[object MutationObserverConstructor]'
-)) {
-  // Use MutationObserver where native Promise is not available,
-  // e.g. PhantomJS, iOS7, Android 4.4
-  // (#6466 MutationObserver is unreliable in IE11)
-  var counter = 1;
-  var observer = new MutationObserver(flushCallbacks);
-  var textNode = document.createTextNode(String(counter));
-  observer.observe(textNode, {
-    characterData: true
-  });
-  timerFunc = function () {
-    counter = (counter + 1) % 2;
-    textNode.data = String(counter);
-  };
-} else if (typeof setImmediate !== 'undefined' && isNative(setImmediate)) {
-  // Fallback to setImmediate.
-  // Techinically it leverages the (macro) task queue,
-  // but it is still a better choice than setTimeout.
-  timerFunc = function () {
-    setImmediate(flushCallbacks);
-  };
-} else {
-  // Fallback to setTimeout.
-  timerFunc = function () {
-    setTimeout(flushCallbacks, 0);
-  };
-}
+// if (typeof Promise !== 'undefined' && isNative(Promise)) {
+//   const p = Promise.resolve()
+//   timerFunc = () => {
+//     p.then(flushCallbacks)
+//     // In problematic UIWebViews, Promise.then doesn't completely break, but
+//     // it can get stuck in a weird state where callbacks are pushed into the
+//     // microtask queue but the queue isn't being flushed, until the browser
+//     // needs to do some other work, e.g. handle a timer. Therefore we can
+//     // "force" the microtask queue to be flushed by adding an empty timer.
+//     if (isIOS) setTimeout(noop)
+//   }
+//   isUsingMicroTask = true
+// } else if (!isIE && typeof MutationObserver !== 'undefined' && (
+//   isNative(MutationObserver) ||
+//   // PhantomJS and iOS 7.x
+//   MutationObserver.toString() === '[object MutationObserverConstructor]'
+// )) {
+//   // Use MutationObserver where native Promise is not available,
+//   // e.g. PhantomJS, iOS7, Android 4.4
+//   // (#6466 MutationObserver is unreliable in IE11)
+//   let counter = 1
+//   const observer = new MutationObserver(flushCallbacks)
+//   const textNode = document.createTextNode(String(counter))
+//   observer.observe(textNode, {
+//     characterData: true
+//   })
+//   timerFunc = () => {
+//     counter = (counter + 1) % 2
+//     textNode.data = String(counter)
+//   }
+//   isUsingMicroTask = true
+// } else if (typeof setImmediate !== 'undefined' && isNative(setImmediate)) {
+//   // Fallback to setImmediate.
+//   // Techinically it leverages the (macro) task queue,
+//   // but it is still a better choice than setTimeout.
+//   timerFunc = () => {
+//     setImmediate(flushCallbacks)
+//   }
+// } else {
+//   // Fallback to setTimeout.
+//   timerFunc = () => {
+//     setTimeout(flushCallbacks, 0)
+//   }
+// }
 
 function nextTick (cb, ctx) {
   var _resolve;
