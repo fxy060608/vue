@@ -215,7 +215,10 @@ export function parse (
     if(__WEEX__){
       attrs.forEach(attr => {
         if(
-          attr.name.indexOf('v-slot') !== 0 && // fixed by xxxxxx 忽略 v-slot
+          (
+            !onRE.test(attr.name) && 
+            attr.name.indexOf('v-slot') !== 0
+          ) && // fixed by xxxxxx 忽略 v-slot
           attr.value === '' &&
           (attr.start + attr.name.length) === attr.end
         ){
