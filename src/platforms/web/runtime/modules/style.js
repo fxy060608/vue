@@ -7,7 +7,7 @@ const cssVarRE = /^--/
 const importantRE = /\s*!important$/
 
 // upx,rpx 正则匹配
-const unitRE = /([+-]?\d+(\.\d+)?)[r|u]px/g
+const unitRE = /\b([+-]?\d+(\.\d+)?)[r|u]px\b/g
 
 const transformUnit = (val) => {
   if (typeof val === 'string') {
