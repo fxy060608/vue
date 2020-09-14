@@ -61,9 +61,11 @@ Dep.SharedObject.targetStack = []
 export function pushTarget (target: ?Watcher) {
   Dep.SharedObject.targetStack.push(target)
   Dep.SharedObject.target = target
+  Dep.target = target
 }
 
 export function popTarget () {
   Dep.SharedObject.targetStack.pop()
   Dep.SharedObject.target = Dep.SharedObject.targetStack[Dep.SharedObject.targetStack.length - 1]
+  Dep.target = Dep.SharedObject.target
 }

@@ -704,13 +704,7 @@ var uid = 0;
  * directives subscribing to it.
  */
 var Dep = function Dep () {
-  // fixed by xxxxxx (nvue vuex)
-  /* eslint-disable no-undef */
-  if(typeof SharedObject !== 'undefined'){
-    this.id = SharedObject.uid++;
-  } else {
-    this.id = uid++;
-  }
+  this.id = uid++;
   this.subs = [];
 };
 
@@ -747,18 +741,20 @@ Dep.prototype.notify = function notify () {
 // can be evaluated at a time.
 // fixed by xxxxxx (nvue shared vuex)
 /* eslint-disable no-undef */
-Dep.SharedObject = typeof SharedObject !== 'undefined' ? SharedObject : {};
+Dep.SharedObject = {};
 Dep.SharedObject.target = null;
 Dep.SharedObject.targetStack = [];
 
 function pushTarget (target) {
   Dep.SharedObject.targetStack.push(target);
   Dep.SharedObject.target = target;
+  Dep.target = target;
 }
 
 function popTarget () {
   Dep.SharedObject.targetStack.pop();
   Dep.SharedObject.target = Dep.SharedObject.targetStack[Dep.SharedObject.targetStack.length - 1];
+  Dep.target = Dep.SharedObject.target;
 }
 
 /*  */
@@ -6803,6 +6799,7 @@ function normalizeStyle (cssText) {
   var regex = /([\w-]*)\s*:\s*([^;]*)/g;
   var rules = {};
   var match;
+  /* eslint-disable no-cond-assign */
   while (match = regex.exec(cssText)) {
     rules[match[1]] = match[2].trim();
   }
@@ -7148,7 +7145,7 @@ function leave (vnode, rm) {
 }
 
 // determine the target animation style for an entering transition.
-function getEnterTargetState (el, stylesheet, startClass, endClass, activeClass, vm) {
+function getEnterTargetState (el, stylesheet, startClass, endClass, activeClass) {
   var targetState = {};
   var startState = stylesheet[startClass];
   var endState = stylesheet[endClass];
@@ -7352,7 +7349,7 @@ function trigger (el, type) {
 /* globals quickappHelper */
 
 var show = {
-  bind: function bind (el, ref, vnode) {
+  bind: function bind (el, ref) {
     var value = ref.value;
 
     var originalDisplay = el.__vOriginalDisplay =
@@ -7360,7 +7357,7 @@ var show = {
     quickappHelper.setElementStyle(el, 'display', value ? originalDisplay : 'none');
   },
 
-  update: function update (el, ref, vnode) {
+  update: function update (el, ref) {
     var value = ref.value;
     var oldValue = ref.oldValue;
 
