@@ -166,7 +166,7 @@ export function internalMixin(Vue: Class<Component>) {
   }
 
   Vue.prototype.__map = function(val, iteratee) {
-    //TODO 暂不考虑 string,number
+    //TODO 暂不考虑 string
     let ret, i, l, keys, key
     if (Array.isArray(val)) {
       ret = new Array(val.length)
@@ -180,6 +180,13 @@ export function internalMixin(Vue: Class<Component>) {
       for (i = 0, l = keys.length; i < l; i++) {
         key = keys[i]
         ret[key] = iteratee(val[key], key, i)
+      }
+      return ret
+    } else if (typeof val === 'number') {
+      ret = new Array(val)
+      for (i = 0, l = val; i < l; i++) {
+        // 第一个参数暂时仍和小程序一致
+        ret[i] = iteratee(i, i)
       }
       return ret
     }
