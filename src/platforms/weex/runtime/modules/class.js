@@ -10,7 +10,11 @@ import {
 } from 'weex/util/class'
 
 import {
-  genClassForVnode
+    genStylesheetForVnode
+} from 'weex/util/stylesheet'
+
+import {
+    genClassForVnode
 } from 'weex/util/class-list'
 
 function updateClass(oldVnode: VNodeWithData, vnode: VNodeWithData) {
@@ -28,17 +32,24 @@ function updateClass(oldVnode: VNodeWithData, vnode: VNodeWithData) {
         return
     }
 
-    if (document.__$automator__) {
-      const cls = genClassForVnode(vnode)
-      vnode.elm.setClassList && vnode.elm.setClassList(cls.split(' '))
+    const isWeexStyleCompiler = document.__$styleCompiler__ === 'weex'
+    if (document.__$automator__ || !isWeexStyleCompiler) {
+        if (!isWeexStyleCompiler) {
+            // 改为在 Element 内解析 class
+            vnode.elm.setStylesheet && vnode.elm.setStylesheet(genStylesheetForVnode(vnode))
+        }
+        const cls = genClassForVnode(vnode)
+        vnode.elm.setClassList && vnode.elm.setClassList(cls.split(' '))
     }
 
-    updateElemStyle(
-        vnode.elm,
-        genClassStyleForVnode(vnode),
-        genClassStyleForVnode(oldVnode),
-        normalize
-    )
+    if (isWeexStyleCompiler) {
+        updateElemStyle(
+            vnode.elm,
+            genClassStyleForVnode(vnode),
+            genClassStyleForVnode(oldVnode),
+            normalize
+        )
+    }
 }
 
 function normalize(name) { //class 已在编译阶段处理

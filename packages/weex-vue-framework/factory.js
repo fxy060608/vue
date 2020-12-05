@@ -7179,6 +7179,34 @@ function updateElemStyle(el, newStyle, oldStyle, normalize) {
 
 /*  */
 
+function genStylesheetForVnode (vnode) {
+  var stylesheet = [];
+  var parentNode = vnode;
+  var childNode = vnode;
+  getStylesheetForVnode(stylesheet, vnode);
+  while (isDef(childNode.componentInstance)) {
+    childNode = childNode.componentInstance._vnode;
+    getStylesheetForVnode(stylesheet, childNode);
+  }
+  while (isDef(parentNode = parentNode.parent)) {
+    getStylesheetForVnode(stylesheet, parentNode, true);
+  }
+  return stylesheet
+}
+
+function getStylesheetForVnode (stylesheet, vnode, unshift) {
+  var style = vnode && vnode.context.$options.style;
+  if (style && !stylesheet.includes(style)) {
+    if (unshift) {
+      stylesheet.unshift(style);
+    } else {
+      stylesheet.push(style);
+    }
+  }
+}
+
+/*  */
+
 function genClassForVnode (vnode) {
   var data = vnode.data;
   var parentNode = vnode;
@@ -7275,17 +7303,24 @@ function updateClass(oldVnode, vnode) {
         return
     }
 
-    if (document.__$automator__) {
-      var cls = genClassForVnode(vnode);
-      vnode.elm.setClassList && vnode.elm.setClassList(cls.split(' '));
+    var isWeexStyleCompiler = document.__$styleCompiler__ === 'weex';
+    if (document.__$automator__ || !isWeexStyleCompiler) {
+        if (!isWeexStyleCompiler) {
+            // 改为在 Element 内解析 class
+            vnode.elm.setStylesheet && vnode.elm.setStylesheet(genStylesheetForVnode(vnode));
+        }
+        var cls = genClassForVnode(vnode);
+        vnode.elm.setClassList && vnode.elm.setClassList(cls.split(' '));
     }
 
-    updateElemStyle(
-        vnode.elm,
-        genClassStyleForVnode(vnode),
-        genClassStyleForVnode(oldVnode),
-        normalize
-    );
+    if (isWeexStyleCompiler) {
+        updateElemStyle(
+            vnode.elm,
+            genClassStyleForVnode(vnode),
+            genClassStyleForVnode(oldVnode),
+            normalize
+        );
+    }
 }
 
 function normalize(name) { //class 已在编译阶段处理
