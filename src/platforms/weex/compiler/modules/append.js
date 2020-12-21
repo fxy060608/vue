@@ -4,8 +4,8 @@ import { makeMap } from 'shared/util'
 
 // The "unitary tag" means that the tag node and its children
 // must be sent to the native together.
-const isUnitaryTag = makeMap('cell,header,cell-slot,recycle-list', true)
-
+const isUnitaryTag = makeMap('cell,header,cell-slot,recycle-list,text,u-text', true)
+// fixed by xxxxxx
 function preTransformNode (el: ASTElement) {
   if (isUnitaryTag(el.tag) && !el.attrsList.some(item => item.name === 'append')) {
     el.attrsMap.append = 'tree'
