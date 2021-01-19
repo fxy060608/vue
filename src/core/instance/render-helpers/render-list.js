@@ -30,7 +30,7 @@ export function renderList (
       const iterator: Iterator<any> = val[Symbol.iterator]()
       let result = iterator.next()
       while (!result.done) {
-        ret.push(render(result.value, ret.length, i++, i)) // fixed by xxxxxx
+        ret.push(render(result.value, ret.length, i, i++)) // fixed by xxxxxx
         result = iterator.next()
       }
     } else {
