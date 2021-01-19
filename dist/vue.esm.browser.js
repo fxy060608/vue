@@ -1,6 +1,6 @@
 /*!
  * Vue.js v2.6.11
- * (c) 2014-2020 Evan You
+ * (c) 2014-2021 Evan You
  * Released under the MIT License.
  */
 /*  */
@@ -2720,7 +2720,7 @@ function renderList (
       const iterator = val[Symbol.iterator]();
       let result = iterator.next();
       while (!result.done) {
-        ret.push(render(result.value, ret.length, i++, i)); // fixed by xxxxxx
+        ret.push(render(result.value, ret.length, i, i++)); // fixed by xxxxxx
         result = iterator.next();
       }
     } else {
@@ -7969,11 +7969,12 @@ const transformUnit = (val) => {
   return val
 };
 
-const urlRE = /url\(\s*'?"?([a-zA-Z0-9\.\-\_\/]+\.(jpg|gif|png))"?'?\s*\)/;
+const urlRE1 = /url\(\s*['"](.+?\.(jpg|gif|png))['"]\s*\)/;
+const urlRE2 = /url\(\s*([a-zA-Z0-9\.\-\_\/]+?\.(jpg|gif|png))\s*\)/;
 
 const transformUrl = (val, ctx) => {
   if (typeof val === 'string' && val.indexOf('url(') !== -1) {
-    const matches = val.match(urlRE);
+    const matches = val.match(urlRE1) || val.match(urlRE2);
     if (matches && matches.length === 3) {
         val = val.replace(matches[1], ctx._$getRealPath(matches[1]));
     }
