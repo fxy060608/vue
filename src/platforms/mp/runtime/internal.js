@@ -54,7 +54,7 @@ export function internalMixin(Vue: Class<Component>) {
     Vue.util.warn(`Error in ${info}: "${err.toString()}"`, vm)
     console.error(err)
     /* eslint-disable no-undef */
-    const app = getApp()
+    const app = typeof getApp === 'function' && getApp()
     if (app && app.onError) {
       app.onError(err)
     }
