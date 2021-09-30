@@ -7186,10 +7186,10 @@ function genStylesheetForVnode (vnode) {
   getStylesheetForVnode(stylesheet, vnode);
   while (isDef(childNode.componentInstance)) {
     childNode = childNode.componentInstance._vnode;
-    getStylesheetForVnode(stylesheet, childNode);
+    getStylesheetForVnode(stylesheet, childNode, true);
   }
   while (isDef(parentNode = parentNode.parent)) {
-    getStylesheetForVnode(stylesheet, parentNode, true);
+    getStylesheetForVnode(stylesheet, parentNode);
   }
   return stylesheet
 }
