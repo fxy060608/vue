@@ -57,10 +57,22 @@ function normalizeAttrs(attrs, el, ctx) {
         return attrs
     }
     const stylesheet = ctx.$options.style || {}
+    const version = stylesheet['@VERSION'] || 1
     Object.keys(attrs).forEach(key => {
         const val = attrs[key]
         if (opts['class'].indexOf(key) !== -1) {
-            attrs[key] = stylesheet[val] || {}
+          // @VERSION Error
+          if (version < 2 || !(('.' + val) in stylesheet)) {
+            attrs[key] = stylesheet[val] || {};
+          } else {
+            // TODO Combinators（runtime/vdom/Element.js）
+            const style = (stylesheet['.' + val] || {})[''] || {}
+            const newStyle = {}
+            for (const key in style) {
+              newStyle[key] = style[key][0]
+            }
+            attrs[key] = newStyle
+          }
         } else if (opts['style'].indexOf(key) !== -1) {
             attrs[key] = normalizeStyleBinding(val)
         }

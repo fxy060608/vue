@@ -7044,10 +7044,22 @@ function normalizeAttrs(attrs, el, ctx) {
         return attrs
     }
     var stylesheet = ctx.$options.style || {};
+    var version = stylesheet['@VERSION'] || 1;
     Object.keys(attrs).forEach(function (key) {
         var val = attrs[key];
         if (opts['class'].indexOf(key) !== -1) {
+          // @VERSION Error
+          if (version < 2 || !(('.' + val) in stylesheet)) {
             attrs[key] = stylesheet[val] || {};
+          } else {
+            // TODO Combinators（runtime/vdom/Element.js）
+            var style = (stylesheet['.' + val] || {})[''] || {};
+            var newStyle = {};
+            for (var key$1 in style) {
+              newStyle[key$1] = style[key$1][0];
+            }
+            attrs[key] = newStyle;
+          }
         } else if (opts['style'].indexOf(key) !== -1) {
             attrs[key] = normalizeStyleBinding(val);
         }
