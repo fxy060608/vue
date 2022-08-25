@@ -34,7 +34,8 @@ const LIFECYCLE_HOOKS = [
     // 'onReady', // 兼容旧版本，应该移除该事件
     'onPageShow',
     'onPageHide',
-    'onPageResize'
+    'onPageResize',
+    'onUploadDouyinVideo'
 ]
 export function lifecycleMixin(Vue: Class<Component>) {
 
