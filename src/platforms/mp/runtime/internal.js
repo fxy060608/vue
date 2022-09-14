@@ -64,9 +64,12 @@ export function internalMixin(Vue: Class<Component>) {
 
   Vue.prototype.$emit = function(event: string): Component {
     if (this.$scope && event) {
-      (this.$scope['_triggerEvent'] || this.$scope['triggerEvent']).call(this.$scope, event, {
-        __args__: toArray(arguments, 1)
-      })
+      const triggerEvent = this.$scope['_triggerEvent'] || this.$scope['triggerEvent']
+      if (triggerEvent) {
+        triggerEvent.call(this.$scope, event, {
+          __args__: toArray(arguments, 1)
+        })
+      }
     }
     return oldEmit.apply(this, arguments)
   }
