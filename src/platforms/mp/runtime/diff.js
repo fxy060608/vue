@@ -3,6 +3,8 @@
  */
 const ARRAYTYPE = '[object Array]'
 const OBJECTTYPE = '[object Object]'
+const NULLTYPE = '[object Null]'
+const UNDEFINEDTYPE = '[object Undefined]'
 // const FUNCTIONTYPE = '[object Function]'
 
 export default function diff(current, pre) {
@@ -36,6 +38,16 @@ function syncKeys(current, pre) {
     }
 }
 
+function nullOrUndefined(currentType, preType) {
+    if(
+        (currentType === NULLTYPE || currentType === UNDEFINEDTYPE) && 
+        (preType === NULLTYPE || preType === UNDEFINEDTYPE)
+    ) {
+        return false
+    }
+    return true
+}
+
 function _diff(current, pre, path, result) {
     if (current === pre) return
     const rootCurrentType = type(current)
@@ -50,7 +62,7 @@ function _diff(current, pre, path, result) {
                 const currentType = type(currentValue)
                 const preType = type(preValue)
                 if (currentType != ARRAYTYPE && currentType != OBJECTTYPE) {
-                    if (currentValue !== pre[key]) {
+                    if (currentValue !== pre[key] && nullOrUndefined(currentType, preType)) {
                         setResult(result, (path == '' ? '' : path + ".") + key, currentValue)
                     }
                 } else if (currentType == ARRAYTYPE) {
