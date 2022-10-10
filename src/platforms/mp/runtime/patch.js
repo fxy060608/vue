@@ -5,6 +5,16 @@ import {
   flushCallbacks
 } from './next-tick'
 
+function clearInstance(key, value) {
+  // 简易去除 Vue 和小程序组件实例
+  if (value) {
+    if (value._isVue || (value.$vm && value.$vm._isVue)) {
+      return {}
+    }
+  }
+  return value
+}
+
 function cloneWithData(vm) {
   // 确保当前 vm 所有数据被同步
   const ret = Object.create(null)
@@ -36,7 +46,7 @@ function cloneWithData(vm) {
     ret['value'] = vm.value
   }
 
-  return JSON.parse(JSON.stringify(ret))
+  return JSON.parse(JSON.stringify(ret, clearInstance))
 }
 
 export const patch: Function = function(oldVnode, vnode) {
