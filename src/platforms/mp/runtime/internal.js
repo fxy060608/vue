@@ -66,9 +66,13 @@ export function internalMixin(Vue: Class<Component>) {
     if (this.$scope && event) {
       const triggerEvent = this.$scope['_triggerEvent'] || this.$scope['triggerEvent']
       if (triggerEvent) {
-        triggerEvent.call(this.$scope, event, {
-          __args__: toArray(arguments, 1)
-        })
+        try {
+          triggerEvent.call(this.$scope, event, {
+            __args__: toArray(arguments, 1)
+          })
+        } catch (error) {
+
+        }
       }
     }
     return oldEmit.apply(this, arguments)
