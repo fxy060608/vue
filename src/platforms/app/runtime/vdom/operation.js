@@ -2,8 +2,8 @@ export function appendBody(doc, node, before) {
   const {
     documentElement
   } = doc
-
-  if (documentElement.pureChildren.length > 0 || node.parentNode) {
+  // fix append comment
+  if ((documentElement.pureChildren.length > 0 && node.nodeType === 1) || node.parentNode) {
     return
   }
   const children = documentElement.children
