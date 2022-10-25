@@ -71,7 +71,7 @@ function updateDOMListeners (oldVnode: VNodeWithData, vnode: VNodeWithData) {
 
   let parent = vnode.parent
   while (parent && parent.componentInstance) { // 使用组件外壳节点id
-    let parentId = parent.data.attrs && parent.data.attrs['_i']
+    let parentId = parent.componentInstance.$attrs && parent.componentInstance.$attrs['_i']
     isDef(parentId) && (nid = 'r-' + parentId)
     parent = parent.parent
   }
