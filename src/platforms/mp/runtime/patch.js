@@ -8,7 +8,7 @@ import {
 function clearInstance(key, value) {
   // 简易去除 Vue 和小程序组件实例
   if (value) {
-    if (value._isVue || (value.$vm && value.$vm._isVue)) {
+    if (value._isVue || value.__v_isMPComponent) {
       return {}
     }
   }
