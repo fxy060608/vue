@@ -999,7 +999,8 @@
       !isServerRendering() &&
       (Array.isArray(value) || isPlainObject(value)) &&
       Object.isExtensible(value) &&
-      !value._isVue
+      !value._isVue &&
+      !value.__v_isMPComponent
     ) {
       ob = new Observer(value);
     }
