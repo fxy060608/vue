@@ -20,7 +20,7 @@ export class CodegenState {
   onceId: number;
   staticRenderFns: Array<string>;
   pre: boolean;
-
+  isInScopeSlot: ?boolean;
   constructor (options: CompilerOptions) {
     this.options = options
     this.warn = options.warn || baseWarn
@@ -438,12 +438,17 @@ function genScopedSlot (
   el: ASTElement,
   state: CodegenState
 ): string {
+  state.isInScopeSlot = true
   const isLegacySyntax = el.attrsMap['slot-scope']
   if (el.if && !el.ifProcessed && !isLegacySyntax) {
-    return genIf(el, state, genScopedSlot, `null`)
+    const res = genIf(el, state, genScopedSlot, `null`)
+    state.isInScopeSlot = false
+    return res
   }
   if (el.for && !el.forProcessed) {
-    return genFor(el, state, genScopedSlot)
+    const res = genFor(el, state, genScopedSlot)
+    state.isInScopeSlot = false
+    return res
   }
   const slotScope = el.slotScope === emptySlotScopeToken
     ? ``
@@ -457,7 +462,9 @@ function genScopedSlot (
     }}`
   // reverse proxy v-slot without scope on this.$slots
   const reverseProxy = slotScope ? `` : `,proxy:true`
-  return `{key:${el.slotTarget || `"default"`},fn:${fn}${reverseProxy}}`
+  const res = `{key:${el.slotTarget || `"default"`},fn:${fn}${reverseProxy}}`
+  state.isInScopeSlot = false
+  return res
 }
 
 export function genChildren (
@@ -546,7 +553,6 @@ export function genComment (comment: ASTText): string {
 function genSlot (el: ASTElement, state: CodegenState): string {
   const slotName = el.slotName || '"default"'
   const children = genChildren(el, state)
-  let res = `_t(${slotName}${children ? `,${children}` : ''}`
   const attrs = el.attrs || el.dynamicAttrs
     ? genProps((el.attrs || []).concat(el.dynamicAttrs || []).map(attr => ({
         // slot props are camelized
@@ -556,16 +562,16 @@ function genSlot (el: ASTElement, state: CodegenState): string {
       })))
     : null
   const bind = el.attrsMap['v-bind']
-  if ((attrs || bind) && !children) {
-    res += `,null`
+ 
+  const args = []
+  args.push(slotName)
+  args.push(children || 'null')
+  args.push(attrs || 'null')
+  args.push(bind || 'null')
+  if (state.isInScopeSlot) {
+    args.push('_svm')
   }
-  if (attrs) {
-    res += `,${attrs}`
-  }
-  if (bind) {
-    res += `${attrs ? '' : ',null'},${bind}`
-  }
-  return res + ')'
+  return `_t(${args.join(',')})`
 }
 
 // componentName is el.component, take it as argument to shun flow's pessimistic refinement

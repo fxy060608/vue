@@ -9,7 +9,8 @@ export function renderSlot (
   name: string,
   fallback: ?Array<VNode>,
   props: ?Object,
-  bindObject: ?Object
+  bindObject: ?Object,
+  slotVm: ?Component
 ): ?Array<VNode> {
   const scopedSlotFn = this.$scopedSlots[name]
   let nodes
@@ -25,7 +26,7 @@ export function renderSlot (
       props = extend(extend({}, bindObject), props)
     }
     // fixed by xxxxxx app-plus scopedSlot
-    nodes = scopedSlotFn(props, this, props._i) || fallback
+    nodes = scopedSlotFn(props, slotVm || this, props._i) || fallback
   } else {
     nodes = this.$slots[name] || fallback
   }
