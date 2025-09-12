@@ -1,5 +1,6 @@
 /* @flow */
 import diff from './diff'
+import rfdc from './rfdc'
 
 import {
   flushCallbacks
@@ -14,6 +15,8 @@ function clearInstance(key, value) {
   }
   return value
 }
+
+const cloneDeepCircles = rfdc({ circles: true, reviver: clearInstance })
 
 function cloneWithData(vm) {
   // 确保当前 vm 所有数据被同步
@@ -46,7 +49,7 @@ function cloneWithData(vm) {
     ret['value'] = vm.value
   }
 
-  return JSON.parse(JSON.stringify(ret, clearInstance))
+  return cloneDeepCircles(ret)
 }
 
 export const patch: Function = function(oldVnode, vnode) {
