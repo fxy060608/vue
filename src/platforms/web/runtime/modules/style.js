@@ -6,11 +6,71 @@ import { cached, camelize, extend, isDef, isUndef, hyphenate } from 'shared/util
 const cssVarRE = /^--/
 const importantRE = /\s*!important$/
 
+// rpx2rem
+const defaultRpx2Unit = {
+  unit: 'rem',
+  unitRatio: 10 / 320,
+  unitPrecision: 5
+}
+
+const Rpx2Unit = Object.assign({}, defaultRpx2Unit)
+
+export function setRpx2Unit (config) {
+  return Object.assign(config, defaultRpx2Unit)
+}
+
+function getRpx2Unit () {
+  return Rpx2Unit
+}
+
+function toFixed (number, precision) {
+  const multiplier = Math.pow(10, precision + 1)
+  const wholeNumber = Math.floor(number * multiplier)
+  return (Math.round(wholeNumber / 10) * 10) / multiplier
+}
+
+function _rpx2Unit (rpx, unit, unitRatio, unitPrecision) {
+  if (unitRatio === 1) {
+    return `${rpx}${unit}`
+  }
+  const value = toFixed(rpx * unitRatio, unitPrecision)
+  return value === 0 ? '0' : `${value}${unit}`
+}
+
+export function createRpx2Unit (unit, unitRatio, unitPrecision) {
+  // ignore: rpxCalcIncludeWidth
+  /**
+   * @param {string | number} val
+   * @returns {string}
+   */
+  return (val) => {
+    if (typeof val === 'string') {
+      return val.replace(unitRE, (m, $1) => {
+        if (!$1) {
+          return m
+        }
+
+        return _rpx2Unit(parseFloat($1), unit, unitRatio, unitPrecision)
+      })
+    } else if (typeof val === 'number') {
+      return _rpx2Unit(val, unit, unitRatio, unitPrecision)
+    }
+  }
+}
+
+const rpx2unit = createRpx2Unit(getRpx2Unit().unit, getRpx2Unit().unitRatio, getRpx2Unit().unitPrecision)
+
 // upx,rpx 正则匹配
 const unitRE = /\b([+-]?\d+(\.\d+)?)[r|u]px\b/g
 
 const transformUnit = (val) => {
   if (typeof val === 'string') {
+    try {
+      const config = __uniConfig.globalStyle || __uniConfig.window || {}
+      if (config.dynamicRpx === true) {
+        return rpx2unit(val)
+      }
+    } catch (error) {}
     return val.replace(unitRE, (a, b) => {
       /* eslint-disable no-undef */
       return uni.upx2px(b) + 'px'
