@@ -1,6 +1,6 @@
 /*!
  * Vue.js v2.6.11
- * (c) 2014-2022 Evan You
+ * (c) 2014-2026 Evan You
  * Released under the MIT License.
  */
 'use strict';
@@ -521,7 +521,7 @@ var hasProto = '__proto__' in {};
 var inBrowser = typeof window !== 'undefined';
 var inWeex = typeof WXEnvironment !== 'undefined' && !!WXEnvironment.platform;
 var weexPlatform = inWeex && WXEnvironment.platform.toLowerCase();
-var UA = inBrowser && window.navigator.userAgent.toLowerCase();
+var UA = inBrowser && window.navigator && window.navigator.userAgent && window.navigator.userAgent.toLowerCase();
 var isIE = UA && /msie|trident/.test(UA);
 var isIE9 = UA && UA.indexOf('msie 9.0') > 0;
 var isEdge = UA && UA.indexOf('edge/') > 0;
@@ -2714,7 +2714,8 @@ function renderSlot (
   name,
   fallback,
   props,
-  bindObject
+  bindObject,
+  slotVm
 ) {
   var scopedSlotFn = this.$scopedSlots[name];
   var nodes;
@@ -2730,7 +2731,7 @@ function renderSlot (
       props = extend(extend({}, bindObject), props);
     }
     // fixed by xxxxxx app-plus scopedSlot
-    nodes = scopedSlotFn(props, this, props._i) || fallback;
+    nodes = scopedSlotFn(props, slotVm || this, props._i) || fallback;
   } else {
     nodes = this.$slots[name] || fallback;
   }

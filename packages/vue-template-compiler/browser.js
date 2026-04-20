@@ -741,7 +741,7 @@
   var inBrowser = typeof window !== 'undefined';
   var inWeex = typeof WXEnvironment !== 'undefined' && !!WXEnvironment.platform;
   var weexPlatform = inWeex && WXEnvironment.platform.toLowerCase();
-  var UA = inBrowser && window.navigator.userAgent.toLowerCase();
+  var UA = inBrowser && window.navigator && window.navigator.userAgent && window.navigator.userAgent.toLowerCase();
   var isIE = UA && /msie|trident/.test(UA);
   var isIE9 = UA && UA.indexOf('msie 9.0') > 0;
   var isEdge = UA && UA.indexOf('edge/') > 0;
@@ -4702,12 +4702,17 @@
     el,
     state
   ) {
+    state.isInScopeSlot = true;
     var isLegacySyntax = el.attrsMap['slot-scope'];
     if (el.if && !el.ifProcessed && !isLegacySyntax) {
-      return genIf(el, state, genScopedSlot, "null")
+      var res$1 = genIf(el, state, genScopedSlot, "null");
+      state.isInScopeSlot = false;
+      return res$1
     }
     if (el.for && !el.forProcessed) {
-      return genFor(el, state, genScopedSlot)
+      var res$2 = genFor(el, state, genScopedSlot);
+      state.isInScopeSlot = false;
+      return res$2
     }
     var slotScope = el.slotScope === emptySlotScopeToken
       ? ""
@@ -4720,7 +4725,9 @@
         : genElement(el, state)) + "}";
     // reverse proxy v-slot without scope on this.$slots
     var reverseProxy = slotScope ? "" : ",proxy:true";
-    return ("{key:" + (el.slotTarget || "\"default\"") + ",fn:" + fn + reverseProxy + "}")
+    var res = "{key:" + (el.slotTarget || "\"default\"") + ",fn:" + fn + reverseProxy + "}";
+    state.isInScopeSlot = false;
+    return res
   }
 
   function genChildren (
@@ -4806,7 +4813,6 @@
   function genSlot (el, state) {
     var slotName = el.slotName || '"default"';
     var children = genChildren(el, state);
-    var res = "_t(" + slotName + (children ? ("," + children) : '');
     var attrs = el.attrs || el.dynamicAttrs
       ? genProps((el.attrs || []).concat(el.dynamicAttrs || []).map(function (attr) { return ({
           // slot props are camelized
@@ -4816,16 +4822,16 @@
         }); }))
       : null;
     var bind$$1 = el.attrsMap['v-bind'];
-    if ((attrs || bind$$1) && !children) {
-      res += ",null";
+   
+    var args = [];
+    args.push(slotName);
+    args.push(children || 'null');
+    args.push(attrs || 'null');
+    args.push(bind$$1 || 'null');
+    if (state.isInScopeSlot) {
+      args.push('_svm');
     }
-    if (attrs) {
-      res += "," + attrs;
-    }
-    if (bind$$1) {
-      res += (attrs ? '' : ',null') + "," + bind$$1;
-    }
-    return res + ')'
+    return ("_t(" + (args.join(',')) + ")")
   }
 
   // componentName is el.component, take it as argument to shun flow's pessimistic refinement
