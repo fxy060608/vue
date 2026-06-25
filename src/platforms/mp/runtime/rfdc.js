@@ -42,7 +42,7 @@ export default function rfdc(opts) {
 
   function cloneArray(a, fn) {
     const keys = Object.keys(a)
-    const a2 = new Array(keys.length)
+    const a2 = new Array(a.length)
     for (let i = 0; i < keys.length; i++) {
       const k = keys[i]
       const cur = a[k]
@@ -124,7 +124,9 @@ function rfdcCircles(opts) {
 
   function cloneArray(a, fn) {
     const keys = Object.keys(a)
-    const a2 = new Array(keys.length)
+    const a2 = new Array(a.length)
+    refs.push(a)
+    refsNew.push(a2)
     for (let i = 0; i < keys.length; i++) {
       const k = keys[i]
       const cur = a[k]
@@ -143,6 +145,8 @@ function rfdcCircles(opts) {
         }
       }
     }
+    refs.pop()
+    refsNew.pop()
     return a2
   }
 
