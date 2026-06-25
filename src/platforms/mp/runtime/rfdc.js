@@ -10,11 +10,12 @@
  */
 
 function copyBuffer(cur) {
-  if (cur instanceof Buffer) {
+  if (typeof Buffer !== 'undefined' && cur instanceof Buffer) {
     return Buffer.from(cur)
   }
 
-  return new cur.constructor(cur.buffer.slice(), cur.byteOffset, cur.length)
+  const length = cur instanceof DataView ? cur.byteLength : cur.length
+  return new cur.constructor(cur.buffer.slice(), cur.byteOffset, length)
 }
 
 /**
@@ -53,7 +54,7 @@ export default function rfdc(opts) {
       } else if (ArrayBuffer.isView(cur)) {
         a2[k] = copyBuffer(cur)
       } else {
-        a2[k] = fn(cur)
+        a2[k] = fn(opts.reviver ? opts.reviver(k, cur) : cur)
       }
     }
     return a2
@@ -141,7 +142,7 @@ function rfdcCircles(opts) {
         if (index !== -1) {
           a2[k] = refsNew[index]
         } else {
-          a2[k] = fn(cur)
+          a2[k] = fn(opts.reviver ? opts.reviver(k, cur) : cur)
         }
       }
     }
