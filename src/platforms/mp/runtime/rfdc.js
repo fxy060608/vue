@@ -28,7 +28,7 @@ export default function rfdc(opts) {
   if (opts.circles) return rfdcCircles(opts)
 
   const constructorHandlers = new Map()
-  constructorHandlers.set(Date, (o) => new Date(o))
+  constructorHandlers.set(Date, (o) => o.toJSON())
   constructorHandlers.set(Map, (o, fn) => new Map(cloneArray(Array.from(o), fn)))
   constructorHandlers.set(Set, (o, fn) => new Set(cloneArray(Array.from(o), fn)))
   if (opts.constructorHandlers) {
@@ -111,7 +111,7 @@ function rfdcCircles(opts) {
   const refsNew = []
 
   const constructorHandlers = new Map()
-  constructorHandlers.set(Date, (o) => new Date(o))
+  constructorHandlers.set(Date, (o) => o.toJSON())
   constructorHandlers.set(Map, (o, fn) => new Map(cloneArray(Array.from(o), fn)))
   constructorHandlers.set(Set, (o, fn) => new Set(cloneArray(Array.from(o), fn)))
   if (opts.constructorHandlers) {
